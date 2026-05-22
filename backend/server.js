@@ -36,6 +36,7 @@ mongoose.connect(process.env.MONGO_URI)
 // Routes
 app.use('/api/auth', (await import('./routes/auth.js')).default);
 app.use('/api/texts', (await import('./routes/texts.js')).default);
+app.use('/api/creators', (await import('./routes/creators.js')).default);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

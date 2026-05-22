@@ -15,6 +15,8 @@ const inputStyle = {
   boxSizing: 'border-box',
 };
 
+const emptyCreator = { name: '', role: '', bio: '', avatar: '', order: 0 };
+
 function Admin({ user }) {
   const navigate = useNavigate();
   const [texts, setTexts] = useState([]);
@@ -24,12 +26,60 @@ function Admin({ user }) {
   const [importText, setImportText] = useState('');
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState(null);
+
+  const [creators, setCreators] = useState([]);
+  const [creatorForm, setCreatorForm] = useState(emptyCreator);
+  const [editingCreator, setEditingCreator] = useState(null);
+  const [savingCreator, setSavingCreator] = useState(false);
+
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     if (!user || user.role !== 'admin') { navigate('/login', { replace: true }); return; }
     fetchTexts();
+    fetchCreators();
   }, [user, navigate]);
+
+  const fetchCreators = async () => {
+    try { const res = await axios.get(`${API_BASE_URL}/api/creators`); setCreators(res.data); }
+    catch (err) { console.error(err); }
+  };
+
+  const handleCreatorSubmit = async (e) => {
+    e.preventDefault();
+    setSavingCreator(true);
+    const token = localStorage.getItem('token');
+    try {
+      if (editingCreator) {
+        await axios.put(`${API_BASE_URL}/api/creators/${editingCreator}`, creatorForm, { headers: { Authorization: `Bearer ${token}` } });
+      } else {
+        await axios.post(`${API_BASE_URL}/api/creators`, creatorForm, { headers: { Authorization: `Bearer ${token}` } });
+      }
+      setCreatorForm(emptyCreator);
+      setEditingCreator(null);
+      fetchCreators();
+    } catch (err) {
+      alert('Xatolik: ' + (err.response?.data?.message || err.message));
+    } finally {
+      setSavingCreator(false);
+    }
+  };
+
+  const startEditCreator = (c) => {
+    setCreatorForm({ name: c.name, role: c.role, bio: c.bio || '', avatar: c.avatar || '', order: c.order || 0 });
+    setEditingCreator(c._id);
+  };
+
+  const deleteCreator = async (id) => {
+    if (!confirm('O\'chirishni tasdiqlaysizmi?')) return;
+    const token = localStorage.getItem('token');
+    try {
+      await axios.delete(`${API_BASE_URL}/api/creators/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      fetchCreators();
+    } catch (err) {
+      alert('Xatolik: ' + err.message);
+    }
+  };
 
   const fetchTexts = async () => {
     try { const res = await axios.get(`${API_BASE_URL}/api/texts`); setTexts(res.data); }
@@ -83,6 +133,7 @@ function Admin({ user }) {
     { id: 'add', label: '+ Matn qo\'shish' },
     { id: 'import', label: '⬆ Import' },
     { id: 'list', label: `📋 Ro'yxat (${totalTexts})` },
+    { id: 'creators', label: `👤 Yaratuvchilar (${creators.length})` },
   ];
 
   return (
@@ -227,6 +278,64 @@ function Admin({ user }) {
             ))}
           </div>
         )}
+        {/* Creators tab */}
+        {activeTab === 'creators' && (
+          <div>
+            {/* Form */}
+            <div style={{ background: 'var(--paper-light)', border: '1px solid var(--border-soft)', borderRadius: '12px', padding: '1.5rem', marginBottom: '2rem' }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', marginBottom: '1rem', color: 'var(--forest-deep)' }}>
+                {editingCreator ? 'Yaratuvchini tahrirlash' : 'Yangi yaratuvchi qo\'shish'}
+              </h3>
+              <form onSubmit={handleCreatorSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                  <input style={inputStyle} placeholder="Ism Familiya *" value={creatorForm.name} onChange={e => setCreatorForm({ ...creatorForm, name: e.target.value })} required />
+                  <input style={inputStyle} placeholder="Lavozim (masalan: Loyiha rahbari) *" value={creatorForm.role} onChange={e => setCreatorForm({ ...creatorForm, role: e.target.value })} required />
+                </div>
+                <input style={inputStyle} placeholder="Avatar URL yoki emoji (masalan: 👨‍💻)" value={creatorForm.avatar} onChange={e => setCreatorForm({ ...creatorForm, avatar: e.target.value })} />
+                <textarea style={{ ...inputStyle, height: '80px', resize: 'vertical' }} placeholder="Qisqacha ma'lumot (ixtiyoriy)" value={creatorForm.bio} onChange={e => setCreatorForm({ ...creatorForm, bio: e.target.value })} />
+                <input style={{ ...inputStyle, width: '120px' }} type="number" placeholder="Tartib raqami" value={creatorForm.order} onChange={e => setCreatorForm({ ...creatorForm, order: Number(e.target.value) })} min={0} />
+                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                  <button type="submit" disabled={savingCreator} style={{ fontFamily: 'var(--font-body)', background: 'var(--forest)', color: 'white', border: 'none', padding: '10px 24px', borderRadius: '8px', cursor: savingCreator ? 'not-allowed' : 'pointer', fontWeight: 500, opacity: savingCreator ? 0.7 : 1 }}>
+                    {savingCreator ? 'Saqlanmoqda...' : editingCreator ? 'Saqlash' : 'Qo\'shish'}
+                  </button>
+                  {editingCreator && (
+                    <button type="button" onClick={() => { setEditingCreator(null); setCreatorForm(emptyCreator); }} style={{ fontFamily: 'var(--font-body)', background: 'none', border: '1px solid var(--border)', padding: '10px 20px', borderRadius: '8px', cursor: 'pointer', color: 'var(--ink-soft)' }}>
+                      Bekor qilish
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+
+            {/* List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {creators.length === 0 && (
+                <p style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-muted)', textAlign: 'center', padding: '2rem', fontStyle: 'italic' }}>Hali yaratuvchi qo'shilmagan</p>
+              )}
+              {creators.map(c => (
+                <div key={c._id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--paper-light)', border: '1px solid var(--border-soft)', borderRadius: '10px', padding: '1rem 1.5rem' }}>
+                  <div style={{ fontSize: '2rem', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--paper-dark)', borderRadius: '50%', flexShrink: 0 }}>
+                    {c.avatar && c.avatar.startsWith('http') ? (
+                      <img src={c.avatar} alt={c.name} style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
+                    ) : (
+                      c.avatar || '👤'
+                    )}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', color: 'var(--forest-deep)' }}>{c.name}</div>
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.82rem', color: 'var(--ink-muted)' }}>{c.role}</div>
+                    {c.bio && <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: 'var(--ink-muted)', marginTop: '2px' }}>{c.bio}</div>}
+                  </div>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button onClick={() => startEditCreator(c)} style={{ fontFamily: 'var(--font-body)', background: 'none', border: '1px solid var(--border)', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.82rem', color: 'var(--ink-soft)' }}>✎</button>
+                    <button onClick={() => deleteCreator(c._id)} style={{ fontFamily: 'var(--font-body)', background: 'none', border: '1px solid #e8b4b4', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.82rem', color: '#c0392b' }}>✕</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         <BackButton to="/" label="Bosh sahifaga qaytish" />
       </div>
     </div>

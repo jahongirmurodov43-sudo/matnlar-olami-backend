@@ -2,6 +2,42 @@ import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 
+function CreatorsSection({ apiBase }) {
+  const [creators, setCreators] = useState([]);
+
+  useEffect(() => {
+    axios.get(`${apiBase}/api/creators`).then(res => setCreators(res.data)).catch(() => {});
+  }, [apiBase]);
+
+  if (creators.length === 0) return null;
+
+  return (
+    <section style={{ padding: '4rem 1.5rem 5rem', borderTop: '1px solid var(--border-soft)' }}>
+      <div className="container" style={{ maxWidth: '900px' }}>
+        <p style={{ textAlign: 'center', fontFamily: 'var(--font-body)', color: 'var(--ink-muted)', letterSpacing: '0.12em', fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '0.75rem' }}>✦ Jamoa ✦</p>
+        <h2 style={{ textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: '2rem', marginBottom: '0.5rem' }}>Yaratuvchilar</h2>
+        <div style={{ width: '40px', height: '2px', background: 'var(--forest)', margin: '0 auto 3rem' }} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
+          {creators.map(c => (
+            <div key={c._id} className="card" style={{ textAlign: 'center' }}>
+              <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'var(--paper-dark)', margin: '0 auto 1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', overflow: 'hidden' }}>
+                {c.avatar && c.avatar.startsWith('http') ? (
+                  <img src={c.avatar} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  c.avatar || '👤'
+                )}
+              </div>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', marginBottom: '0.25rem', color: 'var(--forest-deep)' }}>{c.name}</h3>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.82rem', color: 'var(--forest)', fontWeight: 600, marginBottom: c.bio ? '0.6rem' : 0 }}>{c.role}</p>
+              {c.bio && <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--ink-muted)', lineHeight: 1.7 }}>{c.bio}</p>}
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function Home({ user }) {
   const [counts, setCounts] = useState({ 1: 0, 2: 0, 3: 0, 4: 0 });
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -16,6 +52,7 @@ function Home({ user }) {
       })
       .catch(() => {});
   }, [user, API_BASE_URL]);
+
   // ── Logged-in view ──────────────────────────────────────────
   if (user) {
     return (
@@ -33,7 +70,7 @@ function Home({ user }) {
           </p>
         </section>
 
-        <section style={{ padding: '0 1.5rem 5rem' }}>
+        <section style={{ padding: '0 1.5rem 4rem' }}>
           <div className="container">
             <h2 style={{ textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: '1.5rem', marginBottom: '0.4rem' }}>
               Sinfni tanlang
@@ -57,6 +94,8 @@ function Home({ user }) {
             </div>
           </div>
         </section>
+
+        <CreatorsSection apiBase={API_BASE_URL} />
       </div>
     );
   }
@@ -106,6 +145,9 @@ function Home({ user }) {
           </div>
         </div>
       </section>
+
+      {/* Creators */}
+      <CreatorsSection apiBase={API_BASE_URL} />
 
       {/* CTA */}
       <section style={{ background: 'var(--forest)', color: 'white', padding: '4rem 1.5rem', textAlign: 'center' }}>
