@@ -12,21 +12,38 @@ function Admin() {
     questions: [{ question: '', answer: '' }]
   });
 
+  const API_URL = 'https://matnlar-olami-backend.onrender.com';
+
   useEffect(() => {
     fetchTexts();
   }, []);
 
   const fetchTexts = async () => {
-    const res = await axios.post('https://matnlar-olami-backend.onrender.com/api/auth/login', form);
-    setTexts(res.data);
+    try {
+      const res = await axios.get(`${API_URL}/api/texts`);
+      setTexts(res.data);
+    } catch (err) {
+      console.error("Error fetching texts:", err);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await axios.post('http://localhost:5000/api/texts', form);
-    alert('Matn muvaffaqiyatli qo\'shildi!');
-    fetchTexts();
-    setForm({ title: '', content: '', grade: 1, quarter: 1, language: 'uz', questions: [{ question: '', answer: '' }] });
+    try {
+      await axios.post(`${API_URL}/api/texts`, form);
+      alert('Matn muvaffaqiyatli qo\'shildi!');
+      fetchTexts(); // Refresh the list
+      setForm({ 
+        title: '', 
+        content: '', 
+        grade: 1, 
+        quarter: 1, 
+        language: 'uz', 
+        questions: [{ question: '', answer: '' }] 
+      });
+    } catch (err) {
+      alert('Xatolik yuz berdi: ' + err.message);
+    }
   };
 
   return (
