@@ -9,6 +9,9 @@ import Admin from './pages/Admin';
 import GradePage from './pages/GradePage';
 import TextPage from './pages/TextPage';
 import Settings from './pages/Settings';
+import Search from './pages/Search';
+import Favorites from './pages/Favorites';
+import Profile from './pages/Profile';
 
 function PrivateRoute({ user, children }) {
   if (!user) return <Navigate to="/login" replace />;
@@ -18,6 +21,7 @@ function PrivateRoute({ user, children }) {
 function App() {
   const [user, setUser] = useState(null);
   const [ready, setReady] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('theme') === 'dark');
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -27,6 +31,11 @@ function App() {
     }
     setReady(true);
   }, []);
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+    localStorage.setItem('theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
 
   const handleSetUser = (u) => {
     setUser(u);
@@ -39,7 +48,7 @@ function App() {
   return (
     <Router>
       <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
-        <Navbar user={user} setUser={handleSetUser} />
+        <Navbar user={user} setUser={handleSetUser} darkMode={darkMode} setDarkMode={setDarkMode} />
 
         <main style={{ flex: 1 }}>
           <Routes>
@@ -50,6 +59,9 @@ function App() {
             <Route path="/sinf/:grade" element={<PrivateRoute user={user}><GradePage user={user} /></PrivateRoute>} />
             <Route path="/sinf/:grade/chorak/:quarter/matn/:id" element={<PrivateRoute user={user}><TextPage user={user} /></PrivateRoute>} />
             <Route path="/sozlamalar" element={<PrivateRoute user={user}><Settings /></PrivateRoute>} />
+            <Route path="/qidiruv" element={<PrivateRoute user={user}><Search /></PrivateRoute>} />
+            <Route path="/sevimlilar" element={<PrivateRoute user={user}><Favorites /></PrivateRoute>} />
+            <Route path="/profil" element={<PrivateRoute user={user}><Profile user={user} setUser={handleSetUser} /></PrivateRoute>} />
           </Routes>
         </main>
 

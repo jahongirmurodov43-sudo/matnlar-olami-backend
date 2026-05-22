@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Play, Pause, Printer, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
+import { useFavorites } from '../hooks/useFavorites';
+import { useProgress } from '../hooks/useProgress';
 
 function TextPage({ user }) {
   const lang = 'uz';
@@ -13,12 +15,17 @@ function TextPage({ user }) {
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState(null);
   const [saving, setSaving] = useState(false);
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isRead, markRead } = useProgress();
+  const [answers, setAnswers] = useState({});
+  const [checked, setChecked] = useState({});
+  const [fontSize, setFontSize] = useState(1.08);
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     axios
       .get(`${API_BASE_URL}/api/texts/${id}`)
-      .then(res => { setText(res.data); setLoading(false); })
+      .then(res => { setText(res.data); setLoading(false); markRead(id); })
       .catch(() => setLoading(false));
   }, [id, API_BASE_URL]);
 
@@ -198,6 +205,17 @@ function TextPage({ user }) {
           <button onClick={handlePrint} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-body)', background: 'none', border: '1px solid var(--border)', padding: '8px 16px', borderRadius: '7px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--ink-soft)' }}>
             <Printer size={15} /> Chop etish
           </button>
+          <div style={{ display: 'flex', border: '1px solid var(--border)', borderRadius: '7px', overflow: 'hidden' }}>
+            <button onClick={() => setFontSize(s => Math.max(0.85, s - 0.1))} style={{ fontFamily: 'var(--font-body)', background: 'none', border: 'none', padding: '8px 12px', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--ink-soft)', borderRight: '1px solid var(--border)' }} title="Kichikroq">A−</button>
+            <button onClick={() => setFontSize(1.08)} style={{ fontFamily: 'var(--font-body)', background: 'none', border: 'none', padding: '8px 10px', cursor: 'pointer', fontSize: '0.75rem', color: 'var(--ink-muted)', borderRight: '1px solid var(--border)' }} title="Asl o'lcham">↺</button>
+            <button onClick={() => setFontSize(s => Math.min(1.6, s + 0.1))} style={{ fontFamily: 'var(--font-body)', background: 'none', border: 'none', padding: '8px 12px', cursor: 'pointer', fontSize: '0.9rem', color: 'var(--ink-soft)' }} title="Kattalroq">A+</button>
+          </div>
+          <button
+            onClick={() => toggleFavorite(text)}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-body)', background: 'none', border: `1px solid ${isFavorite(id) ? '#e8b4b4' : 'var(--border)'}`, padding: '8px 16px', borderRadius: '7px', cursor: 'pointer', fontSize: '0.85rem', color: isFavorite(id) ? '#c0392b' : 'var(--ink-soft)' }}
+          >
+            {isFavorite(id) ? '♥' : '♡'} {isFavorite(id) ? 'Sevimli' : 'Sevimliga qo\'shish'}
+          </button>
           {user?.role === 'admin' && (
             <>
               <button onClick={startEditing} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-body)', background: 'none', border: '1px solid var(--border)', padding: '8px 16px', borderRadius: '7px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--ink-soft)' }}>
@@ -214,6 +232,7 @@ function TextPage({ user }) {
         <div style={{ textAlign: 'center', marginBottom: '0.5rem' }}>
           <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: 'var(--ink-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             {grade}-sinf ◆ {quarter}-chorak
+            {text.content && (() => { const mins = Math.ceil(text.content.split(/\s+/).length / 120); return ` ◆ ~${mins} daqiqa`; })()}
           </span>
         </div>
 
@@ -237,7 +256,7 @@ function TextPage({ user }) {
         <div style={{ width: '40px', height: '2px', background: 'var(--forest)', margin: '0 auto 2.5rem' }} />
 
         {/* Content with drop cap on first paragraph */}
-        <div style={{ fontFamily: 'var(--font-body)', fontSize: '1.08rem', lineHeight: 1.9, color: 'var(--ink)' }}>
+        <div style={{ fontFamily: 'var(--font-body)', fontSize: `${fontSize}rem`, lineHeight: 1.9, color: 'var(--ink)', transition: 'font-size 0.2s' }}>
           {paragraphs.map((para, i) => (
             <p key={i} style={{ marginBottom: '1.25rem', textIndent: i === 0 ? '0' : '1.5em' }}>
               {i === 0 ? (
@@ -265,17 +284,50 @@ function TextPage({ user }) {
         {text.questions?.length > 0 && (
           <div style={{ marginTop: '3rem', padding: '2rem', background: 'var(--paper-light)', border: '1px solid var(--border)', borderRadius: '12px' }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', marginBottom: '1.25rem', color: 'var(--forest-deep)' }}>
-              Namunaviy savollar
+              Savollarga javob bering
             </h2>
-            <ol style={{ fontFamily: 'var(--font-body)', paddingLeft: '0', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              {text.questions.map((q, i) => (
-                <li key={i} style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
-                  <span style={{ background: 'var(--forest)', color: 'white', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 600, flexShrink: 0, marginTop: '2px' }}>
-                    {i + 1}
-                  </span>
-                  <span style={{ lineHeight: 1.7 }}>{q.question}</span>
-                </li>
-              ))}
+            <ol style={{ fontFamily: 'var(--font-body)', paddingLeft: '0', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+              {text.questions.map((q, i) => {
+                const userAnswer = answers[i] || '';
+                const result = checked[i];
+                return (
+                  <li key={i}>
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', marginBottom: '0.6rem' }}>
+                      <span style={{ background: result === true ? '#27ae60' : result === false ? '#c0392b' : 'var(--forest)', color: 'white', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 600, flexShrink: 0, marginTop: '2px', transition: 'background 0.2s' }}>
+                        {result === true ? '✓' : result === false ? '✕' : i + 1}
+                      </span>
+                      <span style={{ lineHeight: 1.7 }}>{q.question}</span>
+                    </div>
+                    <div style={{ paddingLeft: '2.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <input
+                        type="text"
+                        placeholder="Javobingizni yozing..."
+                        value={userAnswer}
+                        onChange={e => setAnswers(prev => ({ ...prev, [i]: e.target.value }))}
+                        disabled={result === true}
+                        style={{ flex: 1, minWidth: '180px', fontFamily: 'var(--font-body)', padding: '8px 12px', border: `1px solid ${result === true ? '#27ae60' : result === false ? '#c0392b' : 'var(--border)'}`, borderRadius: '7px', fontSize: '0.9rem', background: result === true ? '#eafaf1' : result === false ? '#fdf3f2' : 'white', outline: 'none' }}
+                      />
+                      {result === undefined || result === false ? (
+                        <button
+                          onClick={() => {
+                            if (!q.answer || !userAnswer.trim()) return;
+                            const correct = userAnswer.trim().toLowerCase().includes(q.answer.trim().toLowerCase()) || q.answer.trim().toLowerCase().includes(userAnswer.trim().toLowerCase());
+                            setChecked(prev => ({ ...prev, [i]: correct }));
+                          }}
+                          style={{ fontFamily: 'var(--font-body)', background: 'var(--forest)', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '7px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500 }}
+                        >Tekshirish</button>
+                      ) : result === true ? (
+                        <span style={{ fontFamily: 'var(--font-body)', color: '#27ae60', fontSize: '0.9rem', alignSelf: 'center', fontWeight: 500 }}>To'g'ri!</span>
+                      ) : null}
+                      {result === false && (
+                        <span style={{ fontFamily: 'var(--font-body)', color: '#c0392b', fontSize: '0.85rem', alignSelf: 'center' }}>
+                          Noto'g'ri. Qayta urinib ko'ring.
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
             </ol>
           </div>
         )}

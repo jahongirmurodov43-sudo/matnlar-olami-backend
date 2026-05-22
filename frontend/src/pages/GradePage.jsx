@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { useProgress } from '../hooks/useProgress';
 
 const QUARTERS = [
   { id: 1, label: 'I-chorak' },
@@ -13,6 +14,7 @@ function GradePage({ user }) {
   const lang = 'uz';
   const { grade } = useParams();
   const navigate = useNavigate();
+  const { isRead } = useProgress();
   const [texts, setTexts] = useState([]);
   const [activeQuarter, setActiveQuarter] = useState(1);
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -117,8 +119,8 @@ function GradePage({ user }) {
                   onMouseEnter={e => { e.currentTarget.style.transform = 'translateX(4px)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(42,38,32,0.1)'; }}
                   onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}
                 >
-                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', color: 'var(--ink-muted)', minWidth: '2rem', textAlign: 'center' }}>
-                    {index + 1}
+                  <span style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', color: isRead(text._id) ? 'var(--forest)' : 'var(--ink-muted)', minWidth: '2rem', textAlign: 'center' }}>
+                    {isRead(text._id) ? '✓' : index + 1}
                   </span>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', color: 'var(--forest-deep)', marginBottom: '0.2rem' }}>

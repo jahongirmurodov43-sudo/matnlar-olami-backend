@@ -74,6 +74,33 @@ input:focus, textarea:focus {
   border-color: var(--forest);
 }
 
+/* Dark mode */
+[data-theme="dark"] {
+  --paper: #1a1a14;
+  --paper-light: #222218;
+  --paper-dark: #2e2e22;
+  --ink: #e8e0cc;
+  --ink-soft: #c8bfa8;
+  --ink-muted: #8a8070;
+  --forest: #5a9e60;
+  --forest-deep: #7dbf84;
+  --border: #3a3a28;
+  --border-soft: #2e2e22;
+}
+
+[data-theme="dark"] body {
+  background: var(--paper);
+  color: var(--ink);
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+  background: var(--paper-light);
+  color: var(--ink);
+  border-color: var(--border);
+}
+
 /* Fade-in animation */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(16px); }

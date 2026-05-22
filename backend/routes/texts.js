@@ -6,11 +6,15 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   try {
-    const { grade, quarter, language } = req.query;
+    const { grade, quarter, language, search } = req.query;
     const filter = {};
     if (language) filter.language = language;
     if (grade) filter.grade = Number(grade);
     if (quarter) filter.quarter = Number(quarter);
+    if (search) filter.$or = [
+      { title: { $regex: search, $options: 'i' } },
+      { content: { $regex: search, $options: 'i' } },
+    ];
 
     const texts = await Text.find(filter).sort({ createdAt: -1 });
     res.json(texts);
