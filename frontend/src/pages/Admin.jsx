@@ -104,22 +104,54 @@ function Admin({ user }) {
 
   const updateQ = (i, field, val) => setForm(f => ({ ...f, questions: f.questions.map((q, idx) => idx === i ? { ...q, [field]: val } : q) }));
 
+  const loadImportFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => { setImportText(ev.target.result); setImportResult(null); };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   const handleImport = async () => {
     let data;
-    try { data = JSON.parse(importText); } catch { alert('JSON formati noto\'g\'ri'); return; }
-    if (!Array.isArray(data)) { alert('JSON array bo\'lishi kerak: [{ title, content, grade, quarter, ... }]'); return; }
+    try {
+      data = JSON.parse(importText);
+    } catch {
+      setImportResult({ error: 'JSON formati noto\'g\'ri. Iltimos, to\'g\'ri JSON kiriting.' });
+      return;
+    }
+    if (!Array.isArray(data)) {
+      setImportResult({ error: 'JSON array bo\'lishi kerak: [ {...}, {...} ]' });
+      return;
+    }
+    if (data.length === 0) {
+      setImportResult({ error: 'Array bo\'sh.' });
+      return;
+    }
+
     setImporting(true);
     setImportResult(null);
     const token = localStorage.getItem('token');
-    let ok = 0, fail = 0;
-    for (const item of data) {
+    const errors = [];
+    let ok = 0;
+
+    for (let i = 0; i < data.length; i++) {
+      const item = data[i];
+      if (!item.title) { errors.push(`#${i + 1}: "title" maydoni yo'q`); continue; }
+      if (!item.content) { errors.push(`#${i + 1} "${item.title}": "content" maydoni yo'q`); continue; }
+      if (!item.grade || item.grade < 1 || item.grade > 4) { errors.push(`#${i + 1} "${item.title}": "grade" 1-4 orasida bo'lishi kerak`); continue; }
+      if (!item.quarter || item.quarter < 1 || item.quarter > 4) { errors.push(`#${i + 1} "${item.title}": "quarter" 1-4 orasida bo'lishi kerak`); continue; }
       try {
         await axios.post(`${API_BASE_URL}/api/texts`, { language: 'uz', ...item }, { headers: { Authorization: `Bearer ${token}` } });
         ok++;
-      } catch { fail++; }
+      } catch (err) {
+        errors.push(`#${i + 1} "${item.title}": ${err.response?.data?.message || err.message}`);
+      }
     }
-    setImportResult({ ok, fail });
-    fetchTexts();
+
+    setImportResult({ ok, errors });
+    if (ok > 0) fetchTexts();
     setImporting(false);
   };
 
@@ -230,34 +262,89 @@ function Admin({ user }) {
         {/* Import */}
         {activeTab === 'import' && (
           <div>
-            <p style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-muted)', fontSize: '0.9rem', marginBottom: '1rem' }}>
-              JSON formatida matnlar massivini kiriting. Misol:
-            </p>
-            <pre style={{ fontFamily: 'monospace', fontSize: '0.78rem', background: 'var(--paper-dark)', padding: '1rem', borderRadius: '8px', overflow: 'auto', marginBottom: '1rem', color: 'var(--ink-soft)' }}>{`[
+            {/* Format guide */}
+            <div style={{ background: 'var(--paper-dark)', border: '1px solid var(--border-soft)', borderRadius: '10px', padding: '1.25rem', marginBottom: '1.25rem' }}>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--ink-muted)', marginBottom: '0.6rem', fontWeight: 600 }}>Majburiy maydonlar:</p>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+                {['"title"', '"content"', '"grade": 1–4', '"quarter": 1–4'].map(f => (
+                  <span key={f} style={{ fontFamily: 'monospace', fontSize: '0.78rem', background: 'var(--forest)', color: 'white', padding: '2px 8px', borderRadius: '4px' }}>{f}</span>
+                ))}
+              </div>
+              <details>
+                <summary style={{ fontFamily: 'var(--font-body)', fontSize: '0.82rem', color: 'var(--forest)', cursor: 'pointer' }}>Namuna JSON ko'rish</summary>
+                <pre style={{ fontFamily: 'monospace', fontSize: '0.75rem', color: 'var(--ink-soft)', marginTop: '0.75rem', overflow: 'auto', whiteSpace: 'pre-wrap' }}>{`[
   {
     "title": "Bahor",
-    "content": "Bahor keldi...",
+    "content": "Bahor keldi. Quyosh chiqdi...",
     "grade": 1,
     "quarter": 1,
     "questions": [
-      { "question": "Fasl nomi nima?", "answer": "Bahor" }
+      { "question": "Qaysi fasl haqida?", "answer": "Bahor" }
     ]
+  },
+  {
+    "title": "Maktab",
+    "content": "Maktab go'zal joy...",
+    "grade": 2,
+    "quarter": 3
   }
 ]`}</pre>
+              </details>
+            </div>
+
+            {/* File upload */}
+            <div style={{ marginBottom: '0.75rem' }}>
+              <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-body)', fontSize: '0.88rem', background: 'var(--paper-light)', border: '1px solid var(--border)', borderRadius: '8px', padding: '9px 18px', cursor: 'pointer', color: 'var(--ink-soft)' }}>
+                📂 .json fayl yuklash
+                <input type="file" accept=".json,application/json" style={{ display: 'none' }} onChange={loadImportFile} />
+              </label>
+              <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.82rem', color: 'var(--ink-muted)', marginLeft: '0.75rem' }}>yoki quyiga joylashtiring</span>
+            </div>
+
             <textarea
-              style={{ ...inputStyle, height: '240px', resize: 'vertical', marginBottom: '1rem', fontFamily: 'monospace', fontSize: '0.85rem' }}
+              style={{ ...inputStyle, height: '220px', resize: 'vertical', marginBottom: '1rem', fontFamily: 'monospace', fontSize: '0.82rem' }}
               placeholder='[{ "title": "...", "content": "...", "grade": 1, "quarter": 1 }]'
               value={importText}
               onChange={e => { setImportText(e.target.value); setImportResult(null); }}
             />
+
+            {/* Results */}
             {importResult && (
-              <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.9rem', marginBottom: '1rem', padding: '0.75rem 1rem', borderRadius: '8px', background: importResult.fail === 0 ? '#eafaf1' : '#fdf3f2', border: `1px solid ${importResult.fail === 0 ? '#27ae60' : '#c0392b'}`, color: importResult.fail === 0 ? '#27ae60' : '#c0392b' }}>
-                ✓ {importResult.ok} ta muvaffaqiyatli qo'shildi{importResult.fail > 0 ? `, ${importResult.fail} ta xatolik` : ''}
+              <div style={{ marginBottom: '1rem' }}>
+                {importResult.error ? (
+                  <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.88rem', padding: '0.75rem 1rem', borderRadius: '8px', background: '#fdf3f2', border: '1px solid #c0392b', color: '#c0392b' }}>
+                    ✕ {importResult.error}
+                  </div>
+                ) : (
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.9rem', padding: '0.75rem 1rem', borderRadius: '8px', background: importResult.errors.length === 0 ? '#eafaf1' : '#fffbeb', border: `1px solid ${importResult.errors.length === 0 ? '#27ae60' : '#f39c12'}`, color: importResult.errors.length === 0 ? '#27ae60' : '#b7791f', marginBottom: importResult.errors.length > 0 ? '0.5rem' : 0 }}>
+                      ✓ {importResult.ok} ta muvaffaqiyatli qo'shildi{importResult.errors.length > 0 ? `, ${importResult.errors.length} ta xatolik` : ''}
+                    </div>
+                    {importResult.errors.length > 0 && (
+                      <div style={{ background: '#fdf3f2', border: '1px solid #e8b4b4', borderRadius: '8px', padding: '0.75rem 1rem' }}>
+                        <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.82rem', color: '#c0392b', fontWeight: 600, marginBottom: '0.5rem' }}>Xatoliklar:</p>
+                        <ul style={{ margin: 0, paddingLeft: '1.2rem' }}>
+                          {importResult.errors.map((e, i) => (
+                            <li key={i} style={{ fontFamily: 'var(--font-body)', fontSize: '0.82rem', color: '#c0392b', marginBottom: '3px' }}>{e}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
             )}
-            <button onClick={handleImport} disabled={importing || !importText.trim()} style={{ fontFamily: 'var(--font-body)', background: 'var(--forest)', color: 'white', border: 'none', padding: '12px 28px', borderRadius: '8px', cursor: importing ? 'not-allowed' : 'pointer', fontSize: '1rem', fontWeight: 500, opacity: importing ? 0.7 : 1 }}>
-              {importing ? 'Yuklanmoqda...' : 'Import qilish'}
-            </button>
+
+            <div style={{ display: 'flex', gap: '0.75rem' }}>
+              <button onClick={handleImport} disabled={importing || !importText.trim()} style={{ fontFamily: 'var(--font-body)', background: 'var(--forest)', color: 'white', border: 'none', padding: '12px 28px', borderRadius: '8px', cursor: importing || !importText.trim() ? 'not-allowed' : 'pointer', fontSize: '1rem', fontWeight: 500, opacity: importing || !importText.trim() ? 0.6 : 1 }}>
+                {importing ? `Yuklanmoqda...` : 'Import qilish'}
+              </button>
+              {importText && (
+                <button onClick={() => { setImportText(''); setImportResult(null); }} style={{ fontFamily: 'var(--font-body)', background: 'none', border: '1px solid var(--border)', padding: '12px 20px', borderRadius: '8px', cursor: 'pointer', color: 'var(--ink-muted)', fontSize: '0.9rem' }}>
+                  Tozalash
+                </button>
+              )}
+            </div>
           </div>
         )}
 
