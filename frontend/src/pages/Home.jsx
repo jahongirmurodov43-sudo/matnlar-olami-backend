@@ -12,7 +12,7 @@ function Home() {
     <div style={{ minHeight: '100vh' }}>
 
       {/* Hero */}
-      <section style={{ textAlign: 'center', padding: '5rem 1.5rem 4rem' }}>
+      <section className="fade-in" style={{ textAlign: 'center', padding: '5rem 1.5rem 4rem' }}>
         <p style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-muted)', letterSpacing: '0.12em', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '1.5rem' }}>
           ✦ O'qish darslari uchun ✦
         </p>
