@@ -7,10 +7,12 @@ function Texts({ user, lang }) {
   const [selectedText, setSelectedText] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  useEffect(() => {
-    axios.get(`http://localhost:5000/api/texts?language=${lang}`)
-      .then(res => setTexts(res.data));
-  }, [lang]);
+useEffect(() => {
+  axios
+    .get(`https://matnlar-olami-backend.onrender.com/api/texts?language=${lang}`)
+    .then(res => setTexts(res.data))
+    .catch(err => console.error(err));
+}, [lang]);
 
   const speak = (text) => {
     const utterance = new SpeechSynthesisUtterance(text);
