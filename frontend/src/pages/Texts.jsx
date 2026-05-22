@@ -18,8 +18,21 @@ function Texts({ user, lang }) {
   }, [lang, API_BASE_URL]);
 
   const speak = (text) => {
+    if (!window.speechSynthesis) {
+      alert('Bu brauzer audio tinglashni qo\'llab-quvvatlamaydi.');
+      return;
+    }
+
+    if (isPlaying) {
+      speechSynthesis.cancel();
+      setIsPlaying(false);
+      return;
+    }
+
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang === 'uz' ? 'uz-UZ' : 'ru-RU';
+    utterance.onerror = () => setIsPlaying(false);
+    utterance.onend = () => setIsPlaying(false);
     speechSynthesis.speak(utterance);
     setIsPlaying(true);
   };
@@ -50,7 +63,7 @@ function Texts({ user, lang }) {
       {selectedText && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
           <div className="bg-white dark:bg-gray-900 w-full max-w-3xl max-h-[90vh] overflow-auto p-8 rounded-3xl">
-            <button onClick={() => setSelectedText(null)} className="float-right text-3xl">×</button>
+            <button onClick={() => { speechSynthesis.cancel(); setIsPlaying(false); setSelectedText(null); }} className="float-right text-3xl">×</button>
             
             <h2 className="text-3xl font-bold mb-6">{selectedText.title}</h2>
             

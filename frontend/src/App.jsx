@@ -24,7 +24,7 @@ function App() {
             <Route path="/login" element={<Login setUser={setUser} />} />
             <Route path="/register" element={<Register />} />
             <Route path="/texts" element={<Texts user={user} lang={lang} />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/admin" element={<Admin user={user} />} />
           </Routes>
         </main>
 

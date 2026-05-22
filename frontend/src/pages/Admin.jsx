@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-function Admin() {
+function Admin({ user }) {
+  const navigate = useNavigate();
   const [texts, setTexts] = useState([]);
   const [form, setForm] = useState({
     title: '',
@@ -12,12 +14,15 @@ function Admin() {
     questions: [{ question: '', answer: '' }]
   });
 
-  // Use environment variable for API URL
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
+    if (!user || user.role !== 'admin') {
+      navigate('/login', { replace: true });
+      return;
+    }
     fetchTexts();
-  }, []);
+  }, [user, navigate]);
 
   const fetchTexts = async () => {
     try {
@@ -30,20 +35,23 @@ function Admin() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const token = localStorage.getItem('token');
     try {
-      await axios.post(`${API_BASE_URL}/api/texts`, form);
+      await axios.post(`${API_BASE_URL}/api/texts`, form, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       alert('Matn muvaffaqiyatli qo\'shildi!');
-      fetchTexts(); // Refresh the list
-      setForm({ 
-        title: '', 
-        content: '', 
-        grade: 1, 
-        quarter: 1, 
-        language: 'uz', 
-        questions: [{ question: '', answer: '' }] 
+      fetchTexts();
+      setForm({
+        title: '',
+        content: '',
+        grade: 1,
+        quarter: 1,
+        language: 'uz',
+        questions: [{ question: '', answer: '' }]
       });
     } catch (err) {
-      alert('Xatolik yuz berdi: ' + err.message);
+      alert('Xatolik yuz berdi: ' + (err.response?.data?.message || err.message));
     }
   };
 
