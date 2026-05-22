@@ -7,12 +7,13 @@ function Register() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const API_URL = 'https://matnlar-olami-backend.onrender.com';
+  // Use environment variable for API URL
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/api/auth/register`, form);
+      await axios.post(`${API_BASE_URL}/api/auth/register`, form);
       alert("Ro'yxatdan o'tish muvaffaqiyatli! Endi kirishingiz mumkin.");
       navigate('/login');
     } catch (err) {
