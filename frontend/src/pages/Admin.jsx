@@ -89,7 +89,7 @@ function Admin({ user }) {
           required
         />
 
-        <div className="grid grid-cols-3 gap-4 mt-6">
+        <div className="grid grid-cols-2 gap-4 mt-6">
           <select
             className="p-4 border rounded-2xl"
             value={form.quarter}
@@ -99,15 +99,6 @@ function Admin({ user }) {
             <option value={2}>2-chorak</option>
             <option value={3}>3-chorak</option>
             <option value={4}>4-chorak</option>
-          </select>
-
-          <select
-            className="p-4 border rounded-2xl"
-            value={form.language}
-            onChange={(e) => setForm({ ...form, language: e.target.value })}
-          >
-            <option value="uz">Uzbek</option>
-            <option value="ru">Russian</option>
           </select>
         </div>
 

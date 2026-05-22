@@ -9,7 +9,8 @@ const QUARTERS = [
   { id: 4, label: 'IV-chorak' },
 ];
 
-function GradePage({ user, lang }) {
+function GradePage({ user }) {
+  const lang = 'uz';
   const { grade } = useParams();
   const navigate = useNavigate();
   const [texts, setTexts] = useState([]);

@@ -1,14 +1,6 @@
 import { Link } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 
-function Navbar({ user, setUser, setLang }) {
-  const { i18n } = useTranslation();
-
-  const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng);
-    setLang(lng);
-  };
-
+function Navbar({ user, setUser }) {
   return (
     <header style={{
       background: 'rgba(245, 239, 225, 0.92)',
@@ -34,24 +26,7 @@ function Navbar({ user, setUser, setLang }) {
             </Link>
           )}
 
-          <select
-            onChange={(e) => changeLanguage(e.target.value)}
-            style={{
-              fontFamily: 'var(--font-body)',
-              background: 'transparent',
-              border: '1px solid var(--border)',
-              borderRadius: '6px',
-              padding: '4px 8px',
-              fontSize: '0.875rem',
-              color: 'var(--ink)',
-              cursor: 'pointer',
-            }}
-          >
-            <option value="uz">🇺🇿 O'zbek</option>
-            <option value="ru">🇷🇺 Русский</option>
-          </select>
-
-          {user ? (
+{user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <span style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-soft)', fontSize: '0.9rem' }}>
                 👤 {user.name}

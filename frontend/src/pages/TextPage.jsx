@@ -3,7 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Play, Pause, Printer, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 
-function TextPage({ user, lang }) {
+function TextPage({ user }) {
+  const lang = 'uz';
   const { grade, quarter, id } = useParams();
   const navigate = useNavigate();
   const [text, setText] = useState(null);
