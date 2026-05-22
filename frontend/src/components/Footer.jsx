@@ -1,22 +1,17 @@
-import { Link } from 'react-router-dom';
-
 function Footer() {
   return (
-    <footer className="bg-emerald-700 text-white mt-auto py-6">
-      <div className="max-w-6xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-4">
-        <p className="font-semibold text-lg">📖 Matnlar Olami</p>
-
-        <div className="flex gap-6 text-sm">
-          <Link to="/" className="hover:underline">Bosh sahifa</Link>
-          <Link to="/texts" className="hover:underline">Matnlar</Link>
-          <Link to="/login" className="hover:underline">Kirish</Link>
-          <Link to="/register" className="hover:underline">Ro'yxatdan o'tish</Link>
-        </div>
-
-        <p className="text-sm text-emerald-200">
-          © {new Date().getFullYear()} Matnlar Olami. Barcha huquqlar himoyalangan.
-        </p>
-      </div>
+    <footer style={{
+      borderTop: '1px solid var(--border)',
+      padding: '2.5rem 1.5rem',
+      textAlign: 'center',
+      background: 'var(--paper-dark)',
+    }}>
+      <p style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: 'var(--ink-soft)', marginBottom: '0.75rem', fontSize: '1rem' }}>
+        "Kitob — bu eng yaxshi do'st, eng zo'r ustoz."
+      </p>
+      <p style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-muted)', fontSize: '0.8rem' }}>
+        © {new Date().getFullYear()} Matnlar Olami — boshlang'ich sinf o'qituvchilari uchun
+      </p>
     </footer>
   );
 }

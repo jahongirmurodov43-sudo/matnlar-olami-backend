@@ -18,6 +18,25 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/:id', async (req, res) => {
+  try {
+    const text = await Text.findById(req.params.id);
+    if (!text) return res.status(404).json({ message: 'Not found' });
+    res.json(text);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.delete('/:id', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    await Text.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 router.post('/', requireAuth, requireAdmin, async (req, res) => {
   try {
     const text = new Text(req.body);

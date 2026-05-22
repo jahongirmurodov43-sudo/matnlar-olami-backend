@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(New-Item -ItemType Directory -Force \"C:\\\\Users\\\\User\\\\matnlar-olami-fullstack\\\\backend\\\\middleware\")",
-      "Bash(Out-Null)"
+      "Bash(Out-Null)",
+      "Skill(browse)",
+      "Skill(browse:*)",
+      "Bash(cat /tmp/static-bundle.js | grep -o 'title:\"[^\"]*\"' | head -40)"
     ]
   }
 }

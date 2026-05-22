@@ -10,37 +10,72 @@ function Navbar({ user, setLang }) {
   };
 
   return (
-    <nav className="bg-emerald-600 text-white p-4 shadow-md">
-      <div className="max-w-6xl mx-auto flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold">📖 Matnlar Olami</Link>
-        
-        <div className="flex items-center gap-6">
-          <Link to="/texts" className="hover:underline">Matnlar</Link>
-          {user?.role === 'admin' && <Link to="/admin" className="hover:underline">Admin</Link>}
-          
-          <select 
+    <header style={{
+      background: 'rgba(245, 239, 225, 0.92)',
+      backdropFilter: 'blur(8px)',
+      borderBottom: '1px solid var(--border-soft)',
+      position: 'sticky',
+      top: 0,
+      zIndex: 100,
+    }}>
+      <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 20px' }}>
+        <Link to="/" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.25rem', color: 'var(--forest-deep)', textDecoration: 'none' }}>
+          📖 Matnlar Olami
+        </Link>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
+          <Link to="/texts" style={{ fontFamily: 'var(--font-body)', color: 'var(--ink)', textDecoration: 'none', fontSize: '0.95rem' }}>
+            Matnlar
+          </Link>
+
+          <Link to="/sozlamalar" style={{ fontFamily: 'var(--font-body)', color: 'var(--ink)', textDecoration: 'none', fontSize: '0.95rem' }}>
+            Sozlamalar
+          </Link>
+
+          {user?.role === 'admin' && (
+            <Link to="/admin" style={{ fontFamily: 'var(--font-body)', color: 'var(--ink)', textDecoration: 'none', fontSize: '0.95rem' }}>
+              Admin
+            </Link>
+          )}
+
+          <select
             onChange={(e) => changeLanguage(e.target.value)}
-            className="bg-emerald-700 px-3 py-1 rounded-lg text-sm"
+            style={{
+              fontFamily: 'var(--font-body)',
+              background: 'transparent',
+              border: '1px solid var(--border)',
+              borderRadius: '6px',
+              padding: '4px 8px',
+              fontSize: '0.875rem',
+              color: 'var(--ink)',
+              cursor: 'pointer',
+            }}
           >
             <option value="uz">🇺🇿 O'zbek</option>
             <option value="ru">🇷🇺 Русский</option>
           </select>
 
           {user ? (
-            <div className="flex items-center gap-2">
+            <span style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-soft)', fontSize: '0.95rem' }}>
               👤 {user.name}
-            </div>
+            </span>
           ) : (
-            <Link 
-              to="/login" 
-              className="bg-white text-emerald-600 px-6 py-2 rounded-full font-medium hover:bg-emerald-50"
-            >
+            <Link to="/login" style={{
+              fontFamily: 'var(--font-body)',
+              background: 'var(--forest)',
+              color: 'white',
+              padding: '8px 20px',
+              borderRadius: '6px',
+              textDecoration: 'none',
+              fontSize: '0.9rem',
+              fontWeight: 500,
+            }}>
               Kirish
             </Link>
           )}
         </div>
       </div>
-    </nav>
+    </header>
   );
 }
 
