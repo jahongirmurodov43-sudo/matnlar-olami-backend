@@ -4,6 +4,7 @@ import axios from 'axios';
 
 function Login({ setUser }) {
   const [form, setForm] = useState({ email: '', password: '' });
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -71,16 +72,26 @@ function Login({ setUser }) {
               <label style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--ink-soft)', display: 'block', marginBottom: '0.4rem' }}>
                 Parol
               </label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                required
-                value={form.password}
-                onChange={e => setForm({ ...form, password: e.target.value })}
-                style={{ width: '100%', padding: '12px 14px', border: '1px solid var(--border)', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '0.95rem', background: 'white', boxSizing: 'border-box', outline: 'none', transition: 'border-color 0.2s' }}
-                onFocus={e => e.target.style.borderColor = 'var(--forest)'}
-                onBlur={e => e.target.style.borderColor = 'var(--border)'}
-              />
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="••••••••"
+                  required
+                  value={form.password}
+                  onChange={e => setForm({ ...form, password: e.target.value })}
+                  style={{ width: '100%', padding: '12px 44px 12px 14px', border: '1px solid var(--border)', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '0.95rem', background: 'white', boxSizing: 'border-box', outline: 'none', transition: 'border-color 0.2s' }}
+                  onFocus={e => e.target.style.borderColor = 'var(--forest)'}
+                  onBlur={e => e.target.style.borderColor = 'var(--border)'}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(s => !s)}
+                  style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ink-muted)', fontSize: '1rem', padding: '2px', lineHeight: 1 }}
+                  tabIndex={-1}
+                >
+                  {showPassword ? '🙈' : '👁'}
+                </button>
+              </div>
             </div>
 
             <button
