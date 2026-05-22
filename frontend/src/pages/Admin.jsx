@@ -12,7 +12,8 @@ function Admin() {
     questions: [{ question: '', answer: '' }]
   });
 
-  const API_URL = 'https://matnlar-olami-backend.onrender.com';
+  // Use environment variable for API URL
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     fetchTexts();
@@ -20,7 +21,7 @@ function Admin() {
 
   const fetchTexts = async () => {
     try {
-      const res = await axios.get(`${API_URL}/api/texts`);
+      const res = await axios.get(`${API_BASE_URL}/api/texts`);
       setTexts(res.data);
     } catch (err) {
       console.error("Error fetching texts:", err);
@@ -30,7 +31,7 @@ function Admin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post(`${API_URL}/api/texts`, form);
+      await axios.post(`${API_BASE_URL}/api/texts`, form);
       alert('Matn muvaffaqiyatli qo\'shildi!');
       fetchTexts(); // Refresh the list
       setForm({ 
