@@ -6,8 +6,9 @@ const router = express.Router();
 
 router.get('/', async (req, res) => {
   try {
-    const { grade, quarter, language = 'uz' } = req.query;
-    const filter = { language };
+    const { grade, quarter, language } = req.query;
+    const filter = {};
+    if (language) filter.language = language;
     if (grade) filter.grade = Number(grade);
     if (quarter) filter.quarter = Number(quarter);
 

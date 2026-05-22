@@ -1,13 +1,21 @@
 import { Link } from 'react-router-dom';
-
-const grades = [
-  { grade: 1, texts: 7 },
-  { grade: 2, texts: 8 },
-  { grade: 3, texts: 7 },
-  { grade: 4, texts: 9 },
-];
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 function Home({ user }) {
+  const [counts, setCounts] = useState({ 1: 0, 2: 0, 3: 0, 4: 0 });
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  useEffect(() => {
+    if (!user) return;
+    axios.get(`${API_BASE_URL}/api/texts`)
+      .then(res => {
+        const c = { 1: 0, 2: 0, 3: 0, 4: 0 };
+        res.data.forEach(t => { if (c[t.grade] !== undefined) c[t.grade]++; });
+        setCounts(c);
+      })
+      .catch(() => {});
+  }, [user, API_BASE_URL]);
   // ── Logged-in view ──────────────────────────────────────────
   if (user) {
     return (
@@ -34,7 +42,7 @@ function Home({ user }) {
               Choraklar va matnlar ichkariga keltiradi
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.25rem' }}>
-              {grades.map(({ grade, texts }) => (
+              {[1, 2, 3, 4].map(grade => (
                 <Link key={grade} to={`/sinf/${grade}`} style={{ textDecoration: 'none' }}>
                   <div className="card" style={{ textAlign: 'center', cursor: 'pointer', transition: 'transform 0.2s, box-shadow 0.2s' }}
                     onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-4px)'; e.currentTarget.style.boxShadow = '0 8px 28px rgba(42,38,32,0.13)'; }}
@@ -42,7 +50,7 @@ function Home({ user }) {
                   >
                     <div style={{ fontFamily: 'var(--font-display)', fontSize: '2.5rem', fontWeight: 700, color: 'var(--forest-deep)', lineHeight: 1 }}>{grade}</div>
                     <div style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-muted)', fontSize: '0.82rem', marginTop: '0.2rem' }}>{grade}-sinf</div>
-                    <div style={{ fontFamily: 'var(--font-body)', color: 'var(--forest)', fontSize: '0.88rem', marginTop: '0.6rem', fontWeight: 500 }}>{texts} ta matn</div>
+                    <div style={{ fontFamily: 'var(--font-body)', color: 'var(--forest)', fontSize: '0.88rem', marginTop: '0.6rem', fontWeight: 500 }}>{counts[grade]} ta matn</div>
                   </div>
                 </Link>
               ))}
