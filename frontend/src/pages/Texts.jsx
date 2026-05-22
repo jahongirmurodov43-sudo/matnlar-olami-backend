@@ -7,12 +7,15 @@ function Texts({ user, lang }) {
   const [selectedText, setSelectedText] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-useEffect(() => {
-  axios
-    .get(`https://matnlar-olami-backend.onrender.com/api/texts?language=${lang}`)
-    .then(res => setTexts(res.data))
-    .catch(err => console.error(err));
-}, [lang]);
+  // API Base URL from environment variable
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+  useEffect(() => {
+    axios
+      .get(`${API_BASE_URL}/api/texts?language=${lang}`)
+      .then(res => setTexts(res.data))
+      .catch(err => console.error(err));
+  }, [lang, API_BASE_URL]);
 
   const speak = (text) => {
     const utterance = new SpeechSynthesisUtterance(text);
