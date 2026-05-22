@@ -1,3 +1,5 @@
+import BackButton from '../components/BackButton';
+
 function Settings() {
   return (
     <div style={{ minHeight: '100vh', padding: '3rem 1.5rem' }}>
@@ -20,6 +22,7 @@ function Settings() {
             © 2026 Matnlar Olami
           </p>
         </div>
+        <BackButton to="/" label="Bosh sahifaga qaytish" />
       </div>
     </div>
   );

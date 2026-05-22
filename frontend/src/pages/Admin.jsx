@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
+import BackButton from '../components/BackButton';
 
 const inputStyle = {
   fontFamily: 'var(--font-body)',
@@ -226,6 +227,7 @@ function Admin({ user }) {
             ))}
           </div>
         )}
+        <BackButton to="/" label="Bosh sahifaga qaytish" />
       </div>
     </div>
   );

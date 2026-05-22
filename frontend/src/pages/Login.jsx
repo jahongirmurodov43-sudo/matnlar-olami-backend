@@ -29,6 +29,10 @@ function Login({ setUser }) {
     <div style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '2rem 1.5rem' }}>
       <div style={{ width: '100%', maxWidth: '420px' }}>
 
+        <button onClick={() => navigate(-1)} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-body)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ink-muted)', fontSize: '0.88rem', marginBottom: '1.5rem', padding: 0 }}>
+          ← Orqaga
+        </button>
+
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
           <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>📖</div>

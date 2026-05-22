@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { useProgress } from '../hooks/useProgress';
 import { useFavorites } from '../hooks/useFavorites';
+import BackButton from '../components/BackButton';
 
 const inputStyle = {
   fontFamily: 'var(--font-body)',
@@ -114,6 +115,7 @@ function Profile({ user, setUser }) {
             </button>
           </form>
         </div>
+        <BackButton to="/" label="Bosh sahifaga qaytish" />
       </div>
     </div>
   );

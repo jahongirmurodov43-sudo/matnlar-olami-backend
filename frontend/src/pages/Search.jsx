@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
+import BackButton from '../components/BackButton';
 
 function Search() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -147,6 +148,7 @@ function Search() {
             </div>
           </>
         )}
+        <BackButton to="/" label="Bosh sahifaga qaytish" />
       </div>
     </div>
   );

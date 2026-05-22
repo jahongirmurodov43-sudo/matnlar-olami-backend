@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useFavorites } from '../hooks/useFavorites';
+import BackButton from '../components/BackButton';
 
 function Favorites() {
   const { favorites, toggleFavorite } = useFavorites();
@@ -60,6 +61,7 @@ function Favorites() {
             ))}
           </div>
         )}
+        <BackButton to="/" label="Bosh sahifaga qaytish" />
       </div>
     </div>
   );
