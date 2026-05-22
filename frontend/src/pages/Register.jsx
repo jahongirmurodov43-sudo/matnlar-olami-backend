@@ -17,7 +17,7 @@ function Register() {
       alert("Ro'yxatdan o'tish muvaffaqiyatli! Endi kirishingiz mumkin.");
       navigate('/login');
     } catch (err) {
-      setError('Registration failed. Try again.');
+      setError(err.response?.data?.message || 'Registration failed. Try again.');
       console.error(err);
     }
   };
