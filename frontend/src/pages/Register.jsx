@@ -7,14 +7,17 @@ function Register() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  const API_URL = 'https://matnlar-olami-backend.onrender.com';
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:5000/api/auth/register', form);
+      await axios.post(`${API_URL}/api/auth/register`, form);
       alert("Ro'yxatdan o'tish muvaffaqiyatli! Endi kirishingiz mumkin.");
       navigate('/login');
     } catch (err) {
       setError('Registration failed. Try again.');
+      console.error(err);
     }
   };
 
@@ -22,7 +25,7 @@ function Register() {
     <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
       <div className="bg-white dark:bg-gray-800 p-8 rounded-3xl shadow-xl w-full max-w-md">
         <h2 className="text-3xl font-bold text-center mb-8">Ro'yxatdan o'tish</h2>
-        
+       
         {error && <p className="text-red-500 text-center mb-4">{error}</p>}
 
         <form onSubmit={handleSubmit} className="space-y-6">
