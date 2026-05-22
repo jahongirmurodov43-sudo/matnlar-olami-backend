@@ -17,7 +17,7 @@ function Admin() {
   }, []);
 
   const fetchTexts = async () => {
-    const res = await axios.get('http://localhost:5000/api/texts');
+    const res = await axios.post('https://matnlar-olami-backend.onrender.com/api/auth/login', form);
     setTexts(res.data);
   };
 
