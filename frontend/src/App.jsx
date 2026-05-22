@@ -54,7 +54,6 @@ function App() {
             <Route path="/register" element={user ? <Navigate to="/" replace /> : <Register />} />
 
             {/* Protected routes */}
-            <Route path="/texts" element={<PrivateRoute user={user}><Texts user={user} lang={lang} /></PrivateRoute>} />
             <Route path="/admin" element={<PrivateRoute user={user}><Admin user={user} /></PrivateRoute>} />
             <Route path="/sinf/:grade" element={<PrivateRoute user={user}><GradePage user={user} lang={lang} /></PrivateRoute>} />
             <Route path="/sinf/:grade/chorak/:quarter/matn/:id" element={<PrivateRoute user={user}><TextPage user={user} lang={lang} /></PrivateRoute>} />

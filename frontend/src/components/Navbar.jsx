@@ -24,10 +24,6 @@ function Navbar({ user, setUser, setLang }) {
         </Link>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
-          <Link to="/texts" style={{ fontFamily: 'var(--font-body)', color: 'var(--ink)', textDecoration: 'none', fontSize: '0.95rem' }}>
-            Matnlar
-          </Link>
-
           <Link to="/sozlamalar" style={{ fontFamily: 'var(--font-body)', color: 'var(--ink)', textDecoration: 'none', fontSize: '0.95rem' }}>
             Sozlamalar
           </Link>
