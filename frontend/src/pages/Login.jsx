@@ -7,10 +7,13 @@ function Login({ setUser }) {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // Use environment variable for API URL
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.post('https://matnlar-olami-backend.onrender.com/api/auth/login', form);
+      const res = await axios.post(`${API_BASE_URL}/api/auth/login`, form);
       localStorage.setItem('token', res.data.token);
       setUser(res.data.user);
       navigate('/texts');
