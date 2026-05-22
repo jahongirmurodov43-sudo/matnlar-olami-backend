@@ -21,7 +21,7 @@ function CreatorsSection({ apiBase }) {
           {creators.map(c => (
             <div key={c._id} className="card" style={{ textAlign: 'center' }}>
               <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'var(--paper-dark)', margin: '0 auto 1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', overflow: 'hidden' }}>
-                {c.avatar && c.avatar.startsWith('http') ? (
+                {c.avatar && (c.avatar.startsWith('http') || c.avatar.startsWith('data:')) ? (
                   <img src={c.avatar} alt={c.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   c.avatar || '👤'

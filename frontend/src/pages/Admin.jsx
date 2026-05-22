@@ -291,7 +291,49 @@ function Admin({ user }) {
                   <input style={inputStyle} placeholder="Ism Familiya *" value={creatorForm.name} onChange={e => setCreatorForm({ ...creatorForm, name: e.target.value })} required />
                   <input style={inputStyle} placeholder="Lavozim (masalan: Loyiha rahbari) *" value={creatorForm.role} onChange={e => setCreatorForm({ ...creatorForm, role: e.target.value })} required />
                 </div>
-                <input style={inputStyle} placeholder="Avatar URL yoki emoji (masalan: 👨‍💻)" value={creatorForm.avatar} onChange={e => setCreatorForm({ ...creatorForm, avatar: e.target.value })} />
+                {/* Avatar upload */}
+                <div>
+                  <label style={{ fontFamily: 'var(--font-body)', fontSize: '0.82rem', color: 'var(--ink-muted)', display: 'block', marginBottom: '6px' }}>Avatar</label>
+                  <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+                    {/* Preview */}
+                    <div style={{ width: '56px', height: '56px', borderRadius: '50%', background: 'var(--paper-dark)', border: '1px solid var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.6rem', overflow: 'hidden', flexShrink: 0 }}>
+                      {creatorForm.avatar ? (
+                        creatorForm.avatar.startsWith('data:') || creatorForm.avatar.startsWith('http') ? (
+                          <img src={creatorForm.avatar} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : creatorForm.avatar
+                      ) : '👤'}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', flex: 1 }}>
+                      {/* File upload button */}
+                      <label style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-body)', fontSize: '0.85rem', background: 'var(--paper-light)', border: '1px solid var(--border)', borderRadius: '7px', padding: '7px 14px', cursor: 'pointer', color: 'var(--ink-soft)', width: 'fit-content' }}>
+                        📁 Rasm yuklash
+                        <input
+                          type="file"
+                          accept="image/*"
+                          style={{ display: 'none' }}
+                          onChange={e => {
+                            const file = e.target.files[0];
+                            if (!file) return;
+                            if (file.size > 2 * 1024 * 1024) { alert('Rasm 2MB dan kichik bo\'lishi kerak'); return; }
+                            const reader = new FileReader();
+                            reader.onload = ev => setCreatorForm(f => ({ ...f, avatar: ev.target.result }));
+                            reader.readAsDataURL(file);
+                          }}
+                        />
+                      </label>
+                      {/* Emoji / URL fallback */}
+                      <input
+                        style={{ ...inputStyle, fontSize: '0.85rem', padding: '7px 12px' }}
+                        placeholder="Yoki emoji kiriting: 👨‍💻"
+                        value={creatorForm.avatar.startsWith('data:') ? '' : creatorForm.avatar}
+                        onChange={e => setCreatorForm({ ...creatorForm, avatar: e.target.value })}
+                      />
+                    </div>
+                    {creatorForm.avatar && (
+                      <button type="button" onClick={() => setCreatorForm(f => ({ ...f, avatar: '' }))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--ink-muted)', fontSize: '1.1rem', padding: '4px' }} title="O'chirish">✕</button>
+                    )}
+                  </div>
+                </div>
                 <textarea style={{ ...inputStyle, height: '80px', resize: 'vertical' }} placeholder="Qisqacha ma'lumot (ixtiyoriy)" value={creatorForm.bio} onChange={e => setCreatorForm({ ...creatorForm, bio: e.target.value })} />
                 <input style={{ ...inputStyle, width: '120px' }} type="number" placeholder="Tartib raqami" value={creatorForm.order} onChange={e => setCreatorForm({ ...creatorForm, order: Number(e.target.value) })} min={0} />
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
@@ -315,7 +357,7 @@ function Admin({ user }) {
               {creators.map(c => (
                 <div key={c._id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--paper-light)', border: '1px solid var(--border-soft)', borderRadius: '10px', padding: '1rem 1.5rem' }}>
                   <div style={{ fontSize: '2rem', width: '48px', height: '48px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--paper-dark)', borderRadius: '50%', flexShrink: 0 }}>
-                    {c.avatar && c.avatar.startsWith('http') ? (
+                    {c.avatar && (c.avatar.startsWith('http') || c.avatar.startsWith('data:')) ? (
                       <img src={c.avatar} alt={c.name} style={{ width: '48px', height: '48px', borderRadius: '50%', objectFit: 'cover' }} />
                     ) : (
                       c.avatar || '👤'
