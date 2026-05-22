@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
-function Navbar({ user, setLang }) {
+function Navbar({ user, setUser, setLang }) {
   const { i18n } = useTranslation();
 
   const changeLanguage = (lng) => {
@@ -56,9 +56,17 @@ function Navbar({ user, setLang }) {
           </select>
 
           {user ? (
-            <span style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-soft)', fontSize: '0.95rem' }}>
-              👤 {user.name}
-            </span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <span style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-soft)', fontSize: '0.9rem' }}>
+                👤 {user.name}
+              </span>
+              <button
+                onClick={() => setUser(null)}
+                style={{ fontFamily: 'var(--font-body)', background: 'none', border: '1px solid var(--border)', borderRadius: '6px', padding: '5px 12px', fontSize: '0.82rem', color: 'var(--ink-muted)', cursor: 'pointer' }}
+              >
+                Chiqish
+              </button>
+            </div>
           ) : (
             <Link to="/login" style={{
               fontFamily: 'var(--font-body)',
