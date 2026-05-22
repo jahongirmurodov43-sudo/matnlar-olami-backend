@@ -5,7 +5,9 @@
       "Bash(Out-Null)",
       "Skill(browse)",
       "Skill(browse:*)",
-      "Bash(cat /tmp/static-bundle.js | grep -o 'title:\"[^\"]*\"' | head -40)"
+      "Bash(cat /tmp/static-bundle.js | grep -o 'title:\"[^\"]*\"' | head -40)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
