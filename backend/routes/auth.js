@@ -45,6 +45,17 @@ router.post('/login', async (req, res) => {
   }
 });
 
+// Get current user (for role refresh on app load)
+router.get('/me', requireAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.json({ name: user.name, role: user.role, language: user.language });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 router.put('/profile', requireAuth, async (req, res) => {
   try {
     const { name, currentPassword, newPassword } = req.body;

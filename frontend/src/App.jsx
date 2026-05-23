@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import axios from 'axios';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -33,6 +34,20 @@ function App() {
     const saved = localStorage.getItem('user');
     if (token && saved) {
       try { setUser(JSON.parse(saved)); } catch {}
+      // Always refresh role from backend so stale localStorage data never hides the correct UI
+      const API = import.meta.env.VITE_API_BASE_URL;
+      axios.get(`${API}/api/auth/me`, { headers: { Authorization: `Bearer ${token}` } })
+        .then(res => {
+          const fresh = res.data;
+          setUser(fresh);
+          localStorage.setItem('user', JSON.stringify(fresh));
+        })
+        .catch(() => {
+          // Token expired or invalid — log out silently
+          setUser(null);
+          localStorage.removeItem('user');
+          localStorage.removeItem('token');
+        });
     }
     setReady(true);
   }, []);
