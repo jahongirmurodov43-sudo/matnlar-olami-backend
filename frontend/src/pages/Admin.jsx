@@ -319,6 +319,7 @@ function Admin({ user }) {
                   </div>
                 ))}
               </div>
+            </div>
 
             {/* Top readers */}
             {topReaders.length > 0 && (
