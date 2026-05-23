@@ -135,6 +135,11 @@ function GradePage({ user }) {
                           {text.questions.length} ta savol
                         </span>
                       )}
+                      {text.difficulty && (
+                        <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.75rem', padding: '2px 10px', borderRadius: '20px', background: text.difficulty === 'easy' ? '#dcfce7' : text.difficulty === 'hard' ? '#fee2e2' : '#fef9c3', color: text.difficulty === 'easy' ? '#16a34a' : text.difficulty === 'hard' ? '#dc2626' : '#ca8a04' }}>
+                          {text.difficulty === 'easy' ? '🟢 Oson' : text.difficulty === 'hard' ? '🔴 Qiyin' : '🟡 O\'rta'}
+                        </span>
+                      )}
                     </div>
                   </div>
                   <span style={{ color: 'var(--ink-muted)', fontSize: '1.2rem' }}>→</span>

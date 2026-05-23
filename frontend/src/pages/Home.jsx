@@ -1,6 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useStreak } from '../hooks/useStreak';
+import { useProgress } from '../hooks/useProgress';
+import { useFavorites } from '../hooks/useFavorites';
+import { useBadges } from '../hooks/useBadges';
 
 function CreatorsSection({ apiBase }) {
   const [creators, setCreators] = useState([]);
@@ -40,6 +44,10 @@ function CreatorsSection({ apiBase }) {
 
 function Home({ user }) {
   const [counts, setCounts] = useState({ 1: 0, 2: 0, 3: 0, 4: 0 });
+  const { streak, todayRead } = useStreak();
+  const { read } = useProgress();
+  const { favorites } = useFavorites();
+  const { earned } = useBadges(read, streak, favorites.length);
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
@@ -68,6 +76,24 @@ function Home({ user }) {
           <p style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-soft)', maxWidth: '520px', margin: '0 auto', fontSize: '1rem', lineHeight: 1.8 }}>
             Xush kelibsiz, <strong>{user.name}</strong>. Quyidagi sinflardan birini tanlang.
           </p>
+
+          <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center', flexWrap: 'wrap', marginTop: '1.5rem' }}>
+            {streak > 0 && (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: todayRead ? '#fff8e1' : 'var(--paper-light)', border: `1px solid ${todayRead ? '#f59e0b' : 'var(--border)'}`, borderRadius: '50px', padding: '8px 20px' }}>
+                <span style={{ fontSize: '1.1rem' }}>🔥</span>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.9rem', color: todayRead ? '#b45309' : 'var(--ink-muted)', fontWeight: 600 }}>
+                  {streak} kunlik streak
+                </span>
+                {!todayRead && <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.78rem', color: 'var(--ink-muted)' }}>— bugun o'qing!</span>}
+              </div>
+            )}
+            {earned.length > 0 && (
+              <Link to="/yutuqlar" style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'var(--paper-light)', border: '1px solid var(--border)', borderRadius: '50px', padding: '8px 20px', textDecoration: 'none' }}>
+                <span style={{ fontSize: '1.1rem' }}>{earned[earned.length - 1].icon}</span>
+                <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.9rem', color: 'var(--forest)', fontWeight: 600 }}>{earned.length} ta yutuq</span>
+              </Link>
+            )}
+          </div>
         </section>
 
         <section style={{ padding: '0 1.5rem 4rem' }}>

@@ -21,11 +21,53 @@ function Admin({ user }) {
   const navigate = useNavigate();
   const [texts, setTexts] = useState([]);
   const [activeTab, setActiveTab] = useState('stats');
-  const [form, setForm] = useState({ title: '', content: '', grade: 1, quarter: 1, language: 'uz', questions: [{ question: '', answer: '' }] });
+  const [form, setForm] = useState({ title: '', content: '', grade: 1, quarter: 1, language: 'uz', difficulty: 'medium', questions: [{ question: '', answer: '', options: [] }] });
   const [submitting, setSubmitting] = useState(false);
   const [importText, setImportText] = useState('');
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState(null);
+
+  const [users, setUsers] = useState([]);
+  const [topReaders, setTopReaders] = useState([]);
+
+  const fetchTopReaders = async () => {
+    const token = localStorage.getItem('token');
+    try {
+      // Fetch all users then get their progress counts
+      const usersRes = await axios.get(`${API_BASE_URL}/api/users`, { headers: { Authorization: `Bearer ${token}` } });
+      const counts = await Promise.all(
+        usersRes.data.slice(0, 10).map(u =>
+          axios.get(`${API_BASE_URL}/api/progress/user/${u._id}`, { headers: { Authorization: `Bearer ${token}` } })
+            .then(r => ({ name: u.name, count: r.data.length }))
+            .catch(() => ({ name: u.name, count: 0 }))
+        )
+      );
+      setTopReaders(counts.sort((a, b) => b.count - a.count).filter(r => r.count > 0));
+    } catch {}
+  };
+
+  const fetchUsers = async () => {
+    const token = localStorage.getItem('token');
+    try { const res = await axios.get(`${API_BASE_URL}/api/users`, { headers: { Authorization: `Bearer ${token}` } }); setUsers(res.data); }
+    catch (err) { console.error(err); }
+  };
+
+  const changeRole = async (id, role) => {
+    const token = localStorage.getItem('token');
+    try {
+      await axios.patch(`${API_BASE_URL}/api/users/${id}/role`, { role }, { headers: { Authorization: `Bearer ${token}` } });
+      fetchUsers();
+    } catch (err) { alert(err.response?.data?.message || err.message); }
+  };
+
+  const deleteUser = async (id) => {
+    if (!confirm('Foydalanuvchini o\'chirishni tasdiqlaysizmi?')) return;
+    const token = localStorage.getItem('token');
+    try {
+      await axios.delete(`${API_BASE_URL}/api/users/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      fetchUsers();
+    } catch (err) { alert(err.response?.data?.message || err.message); }
+  };
 
   const [creators, setCreators] = useState([]);
   const [creatorForm, setCreatorForm] = useState(emptyCreator);
@@ -38,6 +80,8 @@ function Admin({ user }) {
     if (!user || user.role !== 'admin') { navigate('/login', { replace: true }); return; }
     fetchTexts();
     fetchCreators();
+    fetchUsers();
+    fetchTopReaders();
   }, [user, navigate]);
 
   const fetchCreators = async () => {
@@ -93,7 +137,7 @@ function Admin({ user }) {
     try {
       await axios.post(`${API_BASE_URL}/api/texts`, form, { headers: { Authorization: `Bearer ${token}` } });
       fetchTexts();
-      setForm({ title: '', content: '', grade: 1, quarter: 1, language: 'uz', questions: [{ question: '', answer: '' }] });
+      setForm({ title: '', content: '', grade: 1, quarter: 1, language: 'uz', difficulty: 'medium', questions: [{ question: '', answer: '', options: [] }] });
       setActiveTab('list');
     } catch (err) {
       alert('Xatolik: ' + (err.response?.data?.message || err.message));
@@ -103,6 +147,18 @@ function Admin({ user }) {
   };
 
   const updateQ = (i, field, val) => setForm(f => ({ ...f, questions: f.questions.map((q, idx) => idx === i ? { ...q, [field]: val } : q) }));
+  const toggleMC = (i) => setForm(f => ({
+    ...f,
+    questions: f.questions.map((q, idx) => idx === i
+      ? { ...q, options: q.options?.length > 0 ? [] : ['', '', '', ''] }
+      : q)
+  }));
+  const updateOption = (qi, oi, val) => setForm(f => ({
+    ...f,
+    questions: f.questions.map((q, idx) => idx === qi
+      ? { ...q, options: q.options.map((o, oidx) => oidx === oi ? val : o) }
+      : q)
+  }));
 
   const loadImportFile = (e) => {
     const file = e.target.files[0];
@@ -166,6 +222,7 @@ function Admin({ user }) {
     { id: 'import', label: '⬆ Import' },
     { id: 'list', label: `📋 Ro'yxat (${totalTexts})` },
     { id: 'creators', label: `👤 Yaratuvchilar (${creators.length})` },
+    { id: 'users', label: `👥 Foydalanuvchilar (${users.length})` },
   ];
 
   return (
@@ -185,6 +242,44 @@ function Admin({ user }) {
         {/* Stats */}
         {activeTab === 'stats' && (
           <div>
+            {/* Export buttons */}
+            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => {
+                  const dataStr = JSON.stringify(texts, null, 2);
+                  const blob = new Blob([dataStr], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url; a.download = `matnlar-olami-${new Date().toISOString().slice(0,10)}.json`;
+                  a.click(); URL.revokeObjectURL(url);
+                }}
+                style={{ fontFamily: 'var(--font-body)', background: 'var(--forest)', color: 'white', border: 'none', padding: '9px 20px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.88rem', fontWeight: 500 }}
+              >
+                ⬇ JSON export
+              </button>
+              <button
+                onClick={() => {
+                  const header = ['title','content','grade','quarter','language','difficulty','questions'];
+                  const rows = texts.map(t => [
+                    `"${(t.title||'').replace(/"/g,'""')}"`,
+                    `"${(t.content||'').replace(/"/g,'""')}"`,
+                    t.grade, t.quarter,
+                    t.language || 'uz',
+                    t.difficulty || 'medium',
+                    `"${JSON.stringify(t.questions||[]).replace(/"/g,'""')}"`
+                  ]);
+                  const csv = [header.join(','), ...rows.map(r => r.join(','))].join('\n');
+                  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url; a.download = `matnlar-olami-${new Date().toISOString().slice(0,10)}.csv`;
+                  a.click(); URL.revokeObjectURL(url);
+                }}
+                style={{ fontFamily: 'var(--font-body)', background: 'none', border: '1px solid var(--forest)', color: 'var(--forest)', padding: '9px 20px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.88rem', fontWeight: 500 }}
+              >
+                ⬇ CSV export
+              </button>
+            </div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
               {[
                 { label: 'Jami matnlar', value: totalTexts, color: 'var(--forest)' },
@@ -224,7 +319,25 @@ function Admin({ user }) {
                   </div>
                 ))}
               </div>
-            </div>
+
+            {/* Top readers */}
+            {topReaders.length > 0 && (
+              <div style={{ marginTop: '1.5rem', background: 'var(--paper-light)', border: '1px solid var(--border-soft)', borderRadius: '12px', padding: '1.5rem' }}>
+                <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', marginBottom: '1rem', color: 'var(--forest-deep)' }}>🏆 Ko'p o'qiganlar (top 10)</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {topReaders.map((r, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.82rem', color: 'var(--ink-muted)', width: '22px', textAlign: 'right' }}>{i + 1}.</span>
+                      <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.9rem', flex: 1 }}>{r.name}</span>
+                      <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: 'var(--ink-muted)' }}>{r.count} ta</span>
+                      <div style={{ width: '80px', height: '6px', background: 'var(--border)', borderRadius: '3px', overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${(r.count / (topReaders[0]?.count || 1)) * 100}%`, background: 'var(--forest)', borderRadius: '3px' }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -240,17 +353,47 @@ function Admin({ user }) {
                 {[1,2,3,4].map(q => <option key={q} value={q}>{q}-chorak</option>)}
               </select>
             </div>
+            <select style={inputStyle} value={form.difficulty} onChange={e => setForm({ ...form, difficulty: e.target.value })}>
+              <option value="easy">🟢 Oson</option>
+              <option value="medium">🟡 O'rta</option>
+              <option value="hard">🔴 Qiyin</option>
+            </select>
             <textarea style={{ ...inputStyle, height: '200px', resize: 'vertical' }} placeholder="Matn mazmuni..." value={form.content} onChange={e => setForm({ ...form, content: e.target.value })} required />
 
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1rem', marginBottom: '0', marginTop: '0.5rem' }}>Savollar</h3>
             {form.questions.map((q, i) => (
-              <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: '0.5rem' }}>
-                <input style={inputStyle} placeholder={`${i+1}-savol`} value={q.question} onChange={e => updateQ(i, 'question', e.target.value)} />
-                <input style={inputStyle} placeholder="Javob (ixtiyoriy)" value={q.answer} onChange={e => updateQ(i, 'answer', e.target.value)} />
-                <button type="button" onClick={() => setForm(f => ({ ...f, questions: f.questions.filter((_, idx) => idx !== i) }))} style={{ padding: '10px 12px', background: 'none', border: '1px solid #e8b4b4', borderRadius: '8px', cursor: 'pointer', color: '#c0392b' }}>✕</button>
+              <div key={i} style={{ background: 'var(--paper-dark)', border: '1px solid var(--border-soft)', borderRadius: '10px', padding: '0.9rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input style={{ ...inputStyle, flex: 1 }} placeholder={`${i+1}-savol matni`} value={q.question} onChange={e => updateQ(i, 'question', e.target.value)} />
+                  <button type="button" onClick={() => setForm(f => ({ ...f, questions: f.questions.filter((_, idx) => idx !== i) }))} style={{ padding: '10px 12px', background: 'none', border: '1px solid #e8b4b4', borderRadius: '8px', cursor: 'pointer', color: '#c0392b', flexShrink: 0 }}>✕</button>
+                </div>
+                {/* MC toggle */}
+                <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-body)', fontSize: '0.82rem', color: 'var(--ink-soft)', cursor: 'pointer' }}>
+                  <input type="checkbox" checked={q.options?.length > 0} onChange={() => toggleMC(i)} />
+                  Test (A/B/C/D variantlar)
+                </label>
+                {q.options?.length > 0 ? (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                    {['A','B','C','D'].map((letter, oi) => (
+                      <div key={oi} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: '0.85rem', color: 'var(--forest-deep)', width: '18px' }}>{letter}</span>
+                        <input style={{ ...inputStyle, flex: 1 }} placeholder={`${letter} variant`} value={q.options[oi] || ''} onChange={e => updateOption(i, oi, e.target.value)} />
+                      </div>
+                    ))}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '2px' }}>
+                      <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.82rem', color: 'var(--ink-soft)' }}>To'g'ri javob:</span>
+                      <select style={{ ...inputStyle, width: 'auto', padding: '6px 10px' }} value={q.answer} onChange={e => updateQ(i, 'answer', e.target.value)}>
+                        <option value="">— tanlang —</option>
+                        {['A','B','C','D'].map(l => <option key={l} value={l}>{l}</option>)}
+                      </select>
+                    </div>
+                  </div>
+                ) : (
+                  <input style={inputStyle} placeholder="To'g'ri javob (ixtiyoriy)" value={q.answer} onChange={e => updateQ(i, 'answer', e.target.value)} />
+                )}
               </div>
             ))}
-            <button type="button" onClick={() => setForm(f => ({ ...f, questions: [...f.questions, { question: '', answer: '' }] }))} style={{ alignSelf: 'flex-start', fontFamily: 'var(--font-body)', background: 'none', border: '1px solid var(--border)', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--ink-soft)' }}>
+            <button type="button" onClick={() => setForm(f => ({ ...f, questions: [...f.questions, { question: '', answer: '', options: [] }] }))} style={{ alignSelf: 'flex-start', fontFamily: 'var(--font-body)', background: 'none', border: '1px solid var(--border)', padding: '8px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--ink-soft)' }}>
               + Savol qo'shish
             </button>
             <button type="submit" disabled={submitting} style={{ fontFamily: 'var(--font-body)', background: 'var(--forest)', color: 'white', border: 'none', padding: '12px', borderRadius: '8px', cursor: submitting ? 'not-allowed' : 'pointer', fontSize: '1rem', fontWeight: 500, opacity: submitting ? 0.7 : 1, marginTop: '0.5rem' }}>
@@ -462,6 +605,78 @@ function Admin({ user }) {
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Users tab */}
+        {activeTab === 'users' && (
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.88rem', color: 'var(--ink-muted)' }}>
+                Jami: <strong>{users.length}</strong> ta foydalanuvchi
+              </p>
+              <button
+                onClick={fetchUsers}
+                style={{ fontFamily: 'var(--font-body)', background: 'none', border: '1px solid var(--border)', padding: '6px 16px', borderRadius: '8px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--ink-soft)' }}
+              >
+                ↻ Yangilash
+              </button>
+            </div>
+
+            {users.length === 0 ? (
+              <p style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-muted)', textAlign: 'center', padding: '3rem 0', fontStyle: 'italic' }}>Foydalanuvchilar yo'q</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                {users.map(u => (
+                  <div key={u._id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--paper-light)', border: '1px solid var(--border-soft)', borderRadius: '10px', padding: '0.9rem 1.25rem', flexWrap: 'wrap' }}>
+                    {/* Avatar / initials */}
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: u.role === 'admin' ? 'var(--forest)' : 'var(--paper-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', color: u.role === 'admin' ? 'white' : 'var(--ink-muted)', fontWeight: 700, flexShrink: 0, fontFamily: 'var(--font-display)' }}>
+                      {u.name?.[0]?.toUpperCase() || '?'}
+                    </div>
+                    {/* Info */}
+                    <div style={{ flex: 1, minWidth: '160px' }}>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.95rem', color: 'var(--forest-deep)' }}>{u.name}</div>
+                      <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.78rem', color: 'var(--ink-muted)' }}>{u.email}</div>
+                    </div>
+                    {/* Role badge */}
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.75rem', padding: '3px 10px', borderRadius: '20px', background: u.role === 'admin' ? '#d4edda' : '#e8eaf6', color: u.role === 'admin' ? '#155724' : '#3949ab', fontWeight: 600 }}>
+                      {u.role === 'admin' ? '🛡 Admin' : '🎓 O\'quvchi'}
+                    </span>
+                    {/* Joined date */}
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.75rem', color: 'var(--ink-muted)', minWidth: '80px', textAlign: 'right' }}>
+                      {new Date(u.createdAt).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'short', day: 'numeric' })}
+                    </span>
+                    {/* Actions */}
+                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                      {u.role === 'student' ? (
+                        <button
+                          onClick={() => changeRole(u._id, 'admin')}
+                          title="Adminga ko'tarish"
+                          style={{ fontFamily: 'var(--font-body)', fontSize: '0.78rem', background: 'none', border: '1px solid var(--forest)', color: 'var(--forest)', padding: '5px 12px', borderRadius: '6px', cursor: 'pointer' }}
+                        >
+                          🛡 Admin
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => changeRole(u._id, 'student')}
+                          title="O'quvchiga tushirish"
+                          style={{ fontFamily: 'var(--font-body)', fontSize: '0.78rem', background: 'none', border: '1px solid #3949ab', color: '#3949ab', padding: '5px 12px', borderRadius: '6px', cursor: 'pointer' }}
+                        >
+                          🎓 O'quvchi
+                        </button>
+                      )}
+                      <button
+                        onClick={() => deleteUser(u._id)}
+                        title="O'chirish"
+                        style={{ fontFamily: 'var(--font-body)', fontSize: '0.78rem', background: 'none', border: '1px solid #e8b4b4', color: '#c0392b', padding: '5px 12px', borderRadius: '6px', cursor: 'pointer' }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 

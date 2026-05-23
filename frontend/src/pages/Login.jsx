@@ -102,6 +102,12 @@ function Login({ setUser }) {
               {loading ? 'Kirish...' : 'Kirish'}
             </button>
           </form>
+
+          <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+            <Link to="/parolni-unutdim" style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--ink-muted)', textDecoration: 'none' }}>
+              Parolni unutdingizmi?
+            </Link>
+          </div>
         </div>
 
         <p style={{ textAlign: 'center', fontFamily: 'var(--font-body)', color: 'var(--ink-muted)', fontSize: '0.9rem', marginTop: '1.5rem' }}>

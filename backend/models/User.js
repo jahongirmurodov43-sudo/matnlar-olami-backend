@@ -6,7 +6,9 @@ const userSchema = new mongoose.Schema({
   password: { type: String, required: true },
   role: { type: String, enum: ['student', 'teacher', 'admin'], default: 'student' },
   language: { type: String, default: 'uz' },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  resetToken: { type: String },
+  resetTokenExpiry: { type: Date }
 });
 
 const User = mongoose.model('User', userSchema);

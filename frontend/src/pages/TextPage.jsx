@@ -4,6 +4,8 @@ import { Play, Pause, Printer, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 import { useFavorites } from '../hooks/useFavorites';
 import { useProgress } from '../hooks/useProgress';
+import { useStreak } from '../hooks/useStreak';
+import { useNotes } from '../hooks/useNotes';
 
 function TextPage({ user }) {
   const lang = 'uz';
@@ -17,15 +19,19 @@ function TextPage({ user }) {
   const [saving, setSaving] = useState(false);
   const { isFavorite, toggleFavorite } = useFavorites();
   const { isRead, markRead } = useProgress();
+  const { markStreakRead } = useStreak();
+  const { getNote, saveNote } = useNotes();
   const [answers, setAnswers] = useState({});
   const [checked, setChecked] = useState({});
   const [fontSize, setFontSize] = useState(1.08);
+  const [noteText, setNoteText] = useState('');
+  const [noteSaved, setNoteSaved] = useState(false);
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
     axios
       .get(`${API_BASE_URL}/api/texts/${id}`)
-      .then(res => { setText(res.data); setLoading(false); markRead(id); })
+      .then(res => { setText(res.data); setLoading(false); markRead(id); markStreakRead(); setNoteText(getNote(id)); })
       .catch(() => setLoading(false));
   }, [id, API_BASE_URL]);
 
@@ -233,6 +239,7 @@ function TextPage({ user }) {
           <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: 'var(--ink-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
             {grade}-sinf ◆ {quarter}-chorak
             {text.content && (() => { const mins = Math.ceil(text.content.split(/\s+/).length / 120); return ` ◆ ~${mins} daqiqa`; })()}
+            {text.difficulty && ` ◆ ${text.difficulty === 'easy' ? '🟢 Oson' : text.difficulty === 'hard' ? '🔴 Qiyin' : '🟡 O\'rta'}`}
           </span>
         </div>
 
@@ -286,51 +293,145 @@ function TextPage({ user }) {
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.3rem', marginBottom: '1.25rem', color: 'var(--forest-deep)' }}>
               Savollarga javob bering
             </h2>
-            <ol style={{ fontFamily: 'var(--font-body)', paddingLeft: '0', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <ol style={{ fontFamily: 'var(--font-body)', paddingLeft: '0', listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
               {text.questions.map((q, i) => {
+                const isMC = q.options?.length > 0;
                 const userAnswer = answers[i] || '';
                 const result = checked[i];
+                const letters = ['A', 'B', 'C', 'D'];
                 return (
                   <li key={i}>
-                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', marginBottom: '0.6rem' }}>
+                    {/* Question header */}
+                    <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-start', marginBottom: '0.75rem' }}>
                       <span style={{ background: result === true ? '#27ae60' : result === false ? '#c0392b' : 'var(--forest)', color: 'white', borderRadius: '50%', width: '26px', height: '26px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', fontWeight: 600, flexShrink: 0, marginTop: '2px', transition: 'background 0.2s' }}>
                         {result === true ? '✓' : result === false ? '✕' : i + 1}
                       </span>
-                      <span style={{ lineHeight: 1.7 }}>{q.question}</span>
+                      <span style={{ lineHeight: 1.7, fontWeight: 500 }}>{q.question}</span>
                     </div>
-                    <div style={{ paddingLeft: '2.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-                      <input
-                        type="text"
-                        placeholder="Javobingizni yozing..."
-                        value={userAnswer}
-                        onChange={e => setAnswers(prev => ({ ...prev, [i]: e.target.value }))}
-                        disabled={result === true}
-                        style={{ flex: 1, minWidth: '180px', fontFamily: 'var(--font-body)', padding: '8px 12px', border: `1px solid ${result === true ? '#27ae60' : result === false ? '#c0392b' : 'var(--border)'}`, borderRadius: '7px', fontSize: '0.9rem', background: result === true ? '#eafaf1' : result === false ? '#fdf3f2' : 'white', outline: 'none' }}
-                      />
-                      {result === undefined || result === false ? (
-                        <button
-                          onClick={() => {
-                            if (!q.answer || !userAnswer.trim()) return;
-                            const correct = userAnswer.trim().toLowerCase().includes(q.answer.trim().toLowerCase()) || q.answer.trim().toLowerCase().includes(userAnswer.trim().toLowerCase());
-                            setChecked(prev => ({ ...prev, [i]: correct }));
-                          }}
-                          style={{ fontFamily: 'var(--font-body)', background: 'var(--forest)', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '7px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500 }}
-                        >Tekshirish</button>
-                      ) : result === true ? (
-                        <span style={{ fontFamily: 'var(--font-body)', color: '#27ae60', fontSize: '0.9rem', alignSelf: 'center', fontWeight: 500 }}>To'g'ri!</span>
-                      ) : null}
-                      {result === false && (
-                        <span style={{ fontFamily: 'var(--font-body)', color: '#c0392b', fontSize: '0.85rem', alignSelf: 'center' }}>
-                          Noto'g'ri. Qayta urinib ko'ring.
-                        </span>
-                      )}
-                    </div>
+
+                    {isMC ? (
+                      /* Multiple choice */
+                      <div style={{ paddingLeft: '2.5rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                          {q.options.map((opt, oi) => {
+                            const letter = letters[oi];
+                            const isSelected = userAnswer === letter;
+                            const isCorrect = q.answer === letter;
+                            let bg = 'var(--paper-dark)';
+                            let border = 'var(--border-soft)';
+                            let color = 'var(--ink)';
+                            if (result !== undefined) {
+                              if (isCorrect) { bg = '#eafaf1'; border = '#27ae60'; color = '#155724'; }
+                              else if (isSelected && !isCorrect) { bg = '#fdf3f2'; border = '#c0392b'; color = '#c0392b'; }
+                            } else if (isSelected) { bg = 'var(--paper-light)'; border = 'var(--forest)'; }
+                            return (
+                              <label key={oi} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '9px 14px', borderRadius: '8px', border: `1px solid ${border}`, background: bg, cursor: result !== undefined ? 'default' : 'pointer', transition: 'background 0.15s' }}>
+                                <input
+                                  type="radio"
+                                  name={`q-${i}`}
+                                  value={letter}
+                                  checked={isSelected}
+                                  disabled={result !== undefined}
+                                  onChange={() => setAnswers(prev => ({ ...prev, [i]: letter }))}
+                                  style={{ accentColor: 'var(--forest)', width: '16px', height: '16px', flexShrink: 0 }}
+                                />
+                                <span style={{ fontFamily: 'var(--font-body)', fontWeight: 600, color: 'var(--forest-deep)', minWidth: '20px' }}>{letter}.</span>
+                                <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.95rem', color }}>{opt}</span>
+                                {result !== undefined && isCorrect && <span style={{ marginLeft: 'auto', fontSize: '0.82rem', color: '#27ae60', fontWeight: 600 }}>✓ To'g'ri</span>}
+                              </label>
+                            );
+                          })}
+                        </div>
+                        {result === undefined ? (
+                          <button
+                            onClick={() => {
+                              if (!userAnswer) return;
+                              setChecked(prev => ({ ...prev, [i]: userAnswer === q.answer }));
+                            }}
+                            disabled={!userAnswer}
+                            style={{ fontFamily: 'var(--font-body)', background: 'var(--forest)', color: 'white', border: 'none', padding: '8px 20px', borderRadius: '7px', cursor: userAnswer ? 'pointer' : 'not-allowed', fontSize: '0.85rem', fontWeight: 500, opacity: userAnswer ? 1 : 0.5 }}
+                          >Tekshirish</button>
+                        ) : result === true ? (
+                          <span style={{ fontFamily: 'var(--font-body)', color: '#27ae60', fontSize: '0.92rem', fontWeight: 600 }}>🎉 To'g'ri javob!</span>
+                        ) : (
+                          <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.88rem', color: '#c0392b' }}>
+                            Noto'g'ri.
+                            {q.answer && <button onClick={() => setChecked(prev => { const n = {...prev}; delete n[i]; return n; })} style={{ marginLeft: '10px', fontFamily: 'var(--font-body)', background: 'none', border: '1px solid #e8b4b4', padding: '3px 10px', borderRadius: '5px', cursor: 'pointer', color: '#c0392b', fontSize: '0.82rem' }}>Qayta urinish</button>}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      /* Free text */
+                      <div style={{ paddingLeft: '2.5rem', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                        <input
+                          type="text"
+                          placeholder="Javobingizni yozing..."
+                          value={userAnswer}
+                          onChange={e => setAnswers(prev => ({ ...prev, [i]: e.target.value }))}
+                          disabled={result === true}
+                          style={{ flex: 1, minWidth: '180px', fontFamily: 'var(--font-body)', padding: '8px 12px', border: `1px solid ${result === true ? '#27ae60' : result === false ? '#c0392b' : 'var(--border)'}`, borderRadius: '7px', fontSize: '0.9rem', background: result === true ? '#eafaf1' : result === false ? '#fdf3f2' : 'white', outline: 'none', color: 'var(--ink)' }}
+                        />
+                        {result === undefined || result === false ? (
+                          <button
+                            onClick={() => {
+                              if (!q.answer || !userAnswer.trim()) return;
+                              const correct = userAnswer.trim().toLowerCase().includes(q.answer.trim().toLowerCase()) || q.answer.trim().toLowerCase().includes(userAnswer.trim().toLowerCase());
+                              setChecked(prev => ({ ...prev, [i]: correct }));
+                            }}
+                            style={{ fontFamily: 'var(--font-body)', background: 'var(--forest)', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '7px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500 }}
+                          >Tekshirish</button>
+                        ) : result === true ? (
+                          <span style={{ fontFamily: 'var(--font-body)', color: '#27ae60', fontSize: '0.9rem', alignSelf: 'center', fontWeight: 600 }}>🎉 To'g'ri!</span>
+                        ) : null}
+                        {result === false && (
+                          <span style={{ fontFamily: 'var(--font-body)', color: '#c0392b', fontSize: '0.85rem', alignSelf: 'center' }}>
+                            Noto'g'ri. Qayta urinib ko'ring.
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </li>
                 );
               })}
             </ol>
           </div>
         )}
+
+        {/* Personal notes */}
+        <div style={{ marginTop: '2.5rem', padding: '1.5rem', background: 'var(--paper-light)', border: '1px solid var(--border-soft)', borderRadius: '12px' }}>
+          <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', color: 'var(--forest-deep)', marginBottom: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            📝 Shaxsiy qaydlar
+          </h3>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.82rem', color: 'var(--ink-muted)', marginBottom: '0.75rem' }}>
+            Bu qaydlar faqat siz uchun, qurilmangizda saqlanadi.
+          </p>
+          <textarea
+            value={noteText}
+            onChange={e => { setNoteText(e.target.value); setNoteSaved(false); }}
+            placeholder="Bu matn haqida fikr, eslatma yoki savollaringizni yozing..."
+            rows={4}
+            style={{ width: '100%', boxSizing: 'border-box', fontFamily: 'var(--font-body)', fontSize: '0.92rem', padding: '10px 14px', border: '1px solid var(--border)', borderRadius: '8px', background: 'var(--paper-dark)', color: 'var(--ink)', resize: 'vertical', lineHeight: 1.6, outline: 'none' }}
+          />
+          <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.6rem', alignItems: 'center' }}>
+            <button
+              onClick={() => { saveNote(id, noteText); setNoteSaved(true); setTimeout(() => setNoteSaved(false), 2000); }}
+              style={{ fontFamily: 'var(--font-body)', background: 'var(--forest)', color: 'white', border: 'none', padding: '8px 20px', borderRadius: '7px', cursor: 'pointer', fontSize: '0.88rem', fontWeight: 500 }}
+            >
+              Saqlash
+            </button>
+            {noteText && (
+              <button
+                onClick={() => { setNoteText(''); saveNote(id, ''); setNoteSaved(false); }}
+                style={{ fontFamily: 'var(--font-body)', background: 'none', border: '1px solid var(--border)', padding: '8px 16px', borderRadius: '7px', cursor: 'pointer', fontSize: '0.85rem', color: 'var(--ink-muted)' }}
+              >
+                O'chirish
+              </button>
+            )}
+            {noteSaved && (
+              <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: '#27ae60', fontWeight: 500 }}>✓ Saqlandi</span>
+            )}
+          </div>
+        </div>
 
         {/* Back */}
         <div style={{ marginTop: '3rem' }}>

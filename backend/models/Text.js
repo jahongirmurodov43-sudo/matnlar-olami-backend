@@ -7,9 +7,11 @@ const textSchema = new mongoose.Schema({
   quarter: { type: Number, required: true, min: 1, max: 4 },
   questions: [{
     question: String,
-    answer: String
+    answer: String,
+    options: [String]
   }],
   language: { type: String, enum: ['uz', 'ru'], default: 'uz' },
+  difficulty: { type: String, enum: ['easy', 'medium', 'hard'], default: 'medium' },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   createdAt: { type: Date, default: Date.now }
 });

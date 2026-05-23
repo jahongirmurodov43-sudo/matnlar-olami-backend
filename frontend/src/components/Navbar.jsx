@@ -65,6 +65,16 @@ function Navbar({ user, setUser, darkMode, setDarkMode }) {
             Sozlamalar
           </Link>
 
+          {user && (
+            <Link to="/sinflar" style={{ fontFamily: 'var(--font-body)', color: 'var(--ink)', textDecoration: 'none', fontSize: '0.95rem' }} title="Sinflar">
+              🏫
+            </Link>
+          )}
+          {user && (
+            <Link to="/topshiriqlar" style={{ fontFamily: 'var(--font-body)', color: 'var(--ink)', textDecoration: 'none', fontSize: '0.95rem' }} title="Topshiriqlar">
+              📚
+            </Link>
+          )}
           {user?.role === 'admin' && (
             <Link to="/admin" style={{ fontFamily: 'var(--font-body)', color: 'var(--ink)', textDecoration: 'none', fontSize: '0.95rem' }}>
               Admin

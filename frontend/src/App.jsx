@@ -12,6 +12,11 @@ import Settings from './pages/Settings';
 import Search from './pages/Search';
 import Favorites from './pages/Favorites';
 import Profile from './pages/Profile';
+import Badges from './pages/Badges';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
+import Classes from './pages/Classes';
+import Assignments from './pages/Assignments';
 
 function PrivateRoute({ user, children }) {
   if (!user) return <Navigate to="/login" replace />;
@@ -62,6 +67,11 @@ function App() {
             <Route path="/qidiruv" element={<PrivateRoute user={user}><Search /></PrivateRoute>} />
             <Route path="/sevimlilar" element={<PrivateRoute user={user}><Favorites /></PrivateRoute>} />
             <Route path="/profil" element={<PrivateRoute user={user}><Profile user={user} setUser={handleSetUser} /></PrivateRoute>} />
+            <Route path="/yutuqlar" element={<PrivateRoute user={user}><Badges /></PrivateRoute>} />
+            <Route path="/parolni-unutdim" element={<ForgotPassword />} />
+            <Route path="/parolni-tiklash" element={<ResetPassword />} />
+            <Route path="/sinflar" element={<PrivateRoute user={user}><Classes user={user} /></PrivateRoute>} />
+            <Route path="/topshiriqlar" element={<PrivateRoute user={user}><Assignments user={user} /></PrivateRoute>} />
           </Routes>
         </main>
 

@@ -37,6 +37,10 @@ mongoose.connect(process.env.MONGO_URI)
 app.use('/api/auth', (await import('./routes/auth.js')).default);
 app.use('/api/texts', (await import('./routes/texts.js')).default);
 app.use('/api/creators', (await import('./routes/creators.js')).default);
+app.use('/api/users', (await import('./routes/users.js')).default);
+app.use('/api/classes', (await import('./routes/classes.js')).default);
+app.use('/api/assignments', (await import('./routes/assignments.js')).default);
+app.use('/api/progress', (await import('./routes/progress.js')).default);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
