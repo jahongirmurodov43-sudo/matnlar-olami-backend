@@ -83,8 +83,8 @@ function Navbar({ user, setUser, darkMode, setDarkMode }) {
 
 {user ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <Link to="/profil" style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-soft)', fontSize: '0.9rem', textDecoration: 'none' }}>
-                👤 {user.name}
+              <Link to="/profil" style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-soft)', fontSize: '0.9rem', textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                {user.role === 'admin' ? '🛡' : user.role === 'teacher' ? '👩‍🏫' : '🎓'} {user.name}
               </Link>
               <button
                 onClick={() => setUser(null)}

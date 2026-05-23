@@ -10,9 +10,11 @@ const router = express.Router();
 
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, role = 'student' } = req.body;
+    const { name, email, password, role } = req.body;
+    // Only allow student or teacher at registration — admin must be set by existing admin
+    const safeRole = role === 'teacher' ? 'teacher' : 'student';
     const hashed = await bcrypt.hash(password, 10);
-    const user = new User({ name, email, password: hashed, role });
+    const user = new User({ name, email, password: hashed, role: safeRole });
     await user.save();
     res.status(201).json({ message: 'User registered successfully' });
   } catch (err) {

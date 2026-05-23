@@ -631,7 +631,7 @@ function Admin({ user }) {
                 {users.map(u => (
                   <div key={u._id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--paper-light)', border: '1px solid var(--border-soft)', borderRadius: '10px', padding: '0.9rem 1.25rem', flexWrap: 'wrap' }}>
                     {/* Avatar / initials */}
-                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: u.role === 'admin' ? 'var(--forest)' : 'var(--paper-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', color: u.role === 'admin' ? 'white' : 'var(--ink-muted)', fontWeight: 700, flexShrink: 0, fontFamily: 'var(--font-display)' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: u.role === 'admin' ? 'var(--forest)' : u.role === 'teacher' ? '#f0a500' : 'var(--paper-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1rem', color: u.role === 'student' ? 'var(--ink-muted)' : 'white', fontWeight: 700, flexShrink: 0, fontFamily: 'var(--font-display)' }}>
                       {u.name?.[0]?.toUpperCase() || '?'}
                     </div>
                     {/* Info */}
@@ -640,30 +640,34 @@ function Admin({ user }) {
                       <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.78rem', color: 'var(--ink-muted)' }}>{u.email}</div>
                     </div>
                     {/* Role badge */}
-                    <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.75rem', padding: '3px 10px', borderRadius: '20px', background: u.role === 'admin' ? '#d4edda' : '#e8eaf6', color: u.role === 'admin' ? '#155724' : '#3949ab', fontWeight: 600 }}>
-                      {u.role === 'admin' ? '🛡 Admin' : '🎓 O\'quvchi'}
+                    <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.75rem', padding: '3px 10px', borderRadius: '20px', fontWeight: 600,
+                      background: u.role === 'admin' ? '#d4edda' : u.role === 'teacher' ? '#fff3cd' : '#e8eaf6',
+                      color: u.role === 'admin' ? '#155724' : u.role === 'teacher' ? '#856404' : '#3949ab'
+                    }}>
+                      {u.role === 'admin' ? '🛡 Admin' : u.role === 'teacher' ? '👩‍🏫 O\'qituvchi' : '🎓 O\'quvchi'}
                     </span>
                     {/* Joined date */}
                     <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.75rem', color: 'var(--ink-muted)', minWidth: '80px', textAlign: 'right' }}>
                       {new Date(u.createdAt).toLocaleDateString('uz-UZ', { year: 'numeric', month: 'short', day: 'numeric' })}
                     </span>
                     {/* Actions */}
-                    <div style={{ display: 'flex', gap: '0.4rem' }}>
-                      {u.role === 'student' ? (
-                        <button
-                          onClick={() => changeRole(u._id, 'admin')}
-                          title="Adminga ko'tarish"
-                          style={{ fontFamily: 'var(--font-body)', fontSize: '0.78rem', background: 'none', border: '1px solid var(--forest)', color: 'var(--forest)', padding: '5px 12px', borderRadius: '6px', cursor: 'pointer' }}
-                        >
-                          🛡 Admin
+                    <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
+                      {u.role !== 'teacher' && (
+                        <button onClick={() => changeRole(u._id, 'teacher')} title="O'qituvchiga o'tkazish"
+                          style={{ fontFamily: 'var(--font-body)', fontSize: '0.78rem', background: 'none', border: '1px solid #856404', color: '#856404', padding: '5px 10px', borderRadius: '6px', cursor: 'pointer' }}>
+                          👩‍🏫
                         </button>
-                      ) : (
-                        <button
-                          onClick={() => changeRole(u._id, 'student')}
-                          title="O'quvchiga tushirish"
-                          style={{ fontFamily: 'var(--font-body)', fontSize: '0.78rem', background: 'none', border: '1px solid #3949ab', color: '#3949ab', padding: '5px 12px', borderRadius: '6px', cursor: 'pointer' }}
-                        >
-                          🎓 O'quvchi
+                      )}
+                      {u.role !== 'student' && (
+                        <button onClick={() => changeRole(u._id, 'student')} title="O'quvchiga tushirish"
+                          style={{ fontFamily: 'var(--font-body)', fontSize: '0.78rem', background: 'none', border: '1px solid #3949ab', color: '#3949ab', padding: '5px 10px', borderRadius: '6px', cursor: 'pointer' }}>
+                          🎓
+                        </button>
+                      )}
+                      {u.role !== 'admin' && (
+                        <button onClick={() => changeRole(u._id, 'admin')} title="Adminga ko'tarish"
+                          style={{ fontFamily: 'var(--font-body)', fontSize: '0.78rem', background: 'none', border: '1px solid var(--forest)', color: 'var(--forest)', padding: '5px 10px', borderRadius: '6px', cursor: 'pointer' }}>
+                          🛡
                         </button>
                       )}
                       <button

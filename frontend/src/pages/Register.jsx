@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function Register() {
-  const [form, setForm] = useState({ name: '', email: '', password: '' });
+  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'student' });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -94,12 +94,44 @@ function Register() {
               </div>
             </div>
 
+            {/* Role selector */}
+            <div>
+              <label style={{ fontFamily: 'var(--font-body)', fontSize: '0.85rem', color: 'var(--ink-soft)', display: 'block', marginBottom: '0.6rem' }}>
+                Men kim sifatida ro'yxatdan o'taman?
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                {[
+                  { value: 'student', icon: '🎓', title: 'O\'quvchi', desc: 'Matn o\'qiyman va topshiriq bajaraman' },
+                  { value: 'teacher', icon: '👩‍🏫', title: 'O\'qituvchi', desc: 'Sinf yarataman va topshiriq beraman' },
+                ].map(r => (
+                  <button
+                    key={r.value}
+                    type="button"
+                    onClick={() => setForm(f => ({ ...f, role: r.value }))}
+                    style={{
+                      padding: '1rem 0.75rem',
+                      border: `2px solid ${form.role === r.value ? 'var(--forest)' : 'var(--border)'}`,
+                      borderRadius: '10px',
+                      background: form.role === r.value ? '#eaf4e8' : 'white',
+                      cursor: 'pointer',
+                      textAlign: 'center',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <div style={{ fontSize: '1.8rem', marginBottom: '0.35rem' }}>{r.icon}</div>
+                    <div style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: '0.9rem', color: form.role === r.value ? 'var(--forest-deep)' : 'var(--ink)', marginBottom: '0.2rem' }}>{r.title}</div>
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: '0.75rem', color: 'var(--ink-muted)', lineHeight: 1.4 }}>{r.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
+
             <button
               type="submit"
               disabled={loading}
               style={{ width: '100%', padding: '13px', background: loading ? 'var(--ink-muted)' : 'var(--forest)', color: 'white', border: 'none', borderRadius: '8px', fontFamily: 'var(--font-body)', fontSize: '1rem', fontWeight: 600, cursor: loading ? 'not-allowed' : 'pointer', marginTop: '0.5rem', transition: 'background 0.2s' }}
             >
-              {loading ? 'Saqlanmoqda...' : 'Ro\'yxatdan o\'tish'}
+              {loading ? 'Saqlanmoqda...' : `${form.role === 'teacher' ? '👩‍🏫' : '🎓'} Ro'yxatdan o'tish`}
             </button>
           </form>
         </div>
