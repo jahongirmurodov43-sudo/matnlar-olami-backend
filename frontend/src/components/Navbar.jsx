@@ -24,8 +24,22 @@ function Navbar({ user, setUser, darkMode, setDarkMode }) {
       zIndex: 100,
     }}>
       <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 20px' }}>
-        <Link to="/" style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1.25rem', color: 'var(--forest-deep)', textDecoration: 'none' }}>
-          📖 Matnlar Olami
+        <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{
+            width: '36px', height: '36px', borderRadius: '50%',
+            background: 'var(--forest)', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', fontSize: '1rem', flexShrink: 0,
+          }}>
+            📖
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '1rem', color: 'var(--forest-deep)' }}>
+              O'qish savodxonligi darslarida matn ustida ishlash
+            </span>
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.72rem', color: 'var(--forest)', fontStyle: 'italic' }}>
+              Boshlang'ich sinflar uchun
+            </span>
+          </div>
         </Link>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>

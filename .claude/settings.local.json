@@ -7,7 +7,11 @@
       "Skill(browse:*)",
       "Bash(cat /tmp/static-bundle.js | grep -o 'title:\"[^\"]*\"' | head -40)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(git push *)",
+      "Bash(npx serve *)"
     ]
   }
 }
