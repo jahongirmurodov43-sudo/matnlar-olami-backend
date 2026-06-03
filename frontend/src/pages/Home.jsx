@@ -66,13 +66,17 @@ function Home({ user }) {
     return (
       <div style={{ minHeight: '100vh' }}>
         <section className="fade-in" style={{ textAlign: 'center', padding: '4rem 1.5rem 3rem' }}>
-          <p style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-muted)', letterSpacing: '0.12em', fontSize: '0.85rem', textTransform: 'uppercase', marginBottom: '1.25rem' }}>
-            ✦ O'qish darslari uchun ✦
+          <p style={{ fontFamily: 'var(--font-body)', color: 'var(--forest)', letterSpacing: '0.12em', fontSize: '0.78rem', textTransform: 'uppercase', marginBottom: '1.25rem', fontWeight: 500 }}>
+            ✦ O'qish savodxonligi darslarida matn ustida ishlash ✦
           </p>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.5rem, 7vw, 4.5rem)', fontWeight: 700, lineHeight: 1.1, marginBottom: '0.75rem' }}>
-            Matnlar <em style={{ fontStyle: 'italic', fontWeight: 400 }}>Olami</em>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 5vw, 3.2rem)', fontWeight: 800, lineHeight: 1.15, marginBottom: '0.75rem', maxWidth: '640px', margin: '0 auto 0.75rem' }}>
+            O'qish savodxonligi darslarida matn ustida ishlash
           </h1>
-          <div style={{ width: '50px', height: '2px', background: 'var(--forest)', margin: '0 auto 1.25rem' }} />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', margin: '0 auto 1.25rem' }}>
+            <span style={{ fontSize: '0.5rem', color: 'var(--forest)' }}>●</span>
+            <div style={{ width: '40px', height: '2px', background: 'var(--forest)' }} />
+            <span style={{ fontSize: '0.5rem', color: 'var(--forest)' }}>●</span>
+          </div>
           <p style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-soft)', maxWidth: '520px', margin: '0 auto', fontSize: '1rem', lineHeight: 1.8 }}>
             Xush kelibsiz, <strong>{user.name}</strong>. Quyidagi sinflardan birini tanlang.
           </p>
@@ -132,15 +136,19 @@ function Home({ user }) {
 
       {/* Hero */}
       <section className="fade-in" style={{ textAlign: 'center', padding: '6rem 1.5rem 5rem' }}>
-        <p style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-muted)', letterSpacing: '0.15em', fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '1.5rem' }}>
-          ✦ Boshlang'ich sinflar uchun ✦
+        <p style={{ fontFamily: 'var(--font-body)', color: 'var(--forest)', letterSpacing: '0.15em', fontSize: '0.78rem', textTransform: 'uppercase', marginBottom: '1.5rem', fontWeight: 500 }}>
+          ✦ O'qish savodxonligi darslarida matn ustida ishlash ✦
         </p>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(3rem, 8vw, 5rem)', fontWeight: 700, lineHeight: 1.1, marginBottom: '1rem' }}>
-          Matnlar <em style={{ fontStyle: 'italic', fontWeight: 400 }}>Olami</em>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2.2rem, 6vw, 4rem)', fontWeight: 800, lineHeight: 1.15, marginBottom: '1.25rem', maxWidth: '720px', margin: '0 auto 1.25rem' }}>
+          O'qish savodxonligi darslarida matn ustida ishlash
         </h1>
-        <div style={{ width: '60px', height: '2px', background: 'var(--forest)', margin: '0 auto 1.75rem' }} />
-        <p style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-soft)', maxWidth: '540px', margin: '0 auto 3rem', fontSize: '1.05rem', lineHeight: 1.9 }}>
-          Boshlang'ich sinflar o'qish darsligi bo'yicha matnlar va namunaviy savollar to'plami. O'qituvchilar uchun qulay, sinflar va choraklar bo'yicha tartiblangan kutubxona.
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', margin: '0 auto 1.75rem' }}>
+          <span style={{ fontSize: '0.5rem', color: 'var(--forest)' }}>●</span>
+          <div style={{ width: '60px', height: '2px', background: 'var(--forest)' }} />
+          <span style={{ fontSize: '0.5rem', color: 'var(--forest)' }}>●</span>
+        </div>
+        <p style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-soft)', maxWidth: '580px', margin: '0 auto 3rem', fontSize: '1.05rem', lineHeight: 1.9 }}>
+          Boshlang'ich sinf o'qish savodxonligi darslarida matn ustida ishlash va tanqidiy fikrlashga yo'naltiruvchi savollar to'plami. O'qituvchilar uchun qulay, sinflar va choraklar bo'yicha tartiblangan kutubxona.
         </p>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link to="/login" style={{ fontFamily: 'var(--font-body)', background: 'var(--forest)', color: 'white', padding: '14px 36px', borderRadius: '8px', textDecoration: 'none', fontSize: '1rem', fontWeight: 600 }}>
