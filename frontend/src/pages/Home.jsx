@@ -18,9 +18,7 @@ function CreatorsSection({ apiBase }) {
   return (
     <section style={{ padding: '4rem 1.5rem 5rem', borderTop: '1px solid var(--border-soft)' }}>
       <div className="container" style={{ maxWidth: '900px' }}>
-        <p style={{ textAlign: 'center', fontFamily: 'var(--font-body)', color: 'var(--ink-muted)', letterSpacing: '0.12em', fontSize: '0.8rem', textTransform: 'uppercase', marginBottom: '0.75rem' }}>✦ Jamoa ✦</p>
-        <h2 style={{ textAlign: 'center', fontFamily: 'var(--font-display)', fontSize: '2rem', marginBottom: '0.5rem' }}>Yaratuvchilar</h2>
-        <div style={{ width: '40px', height: '2px', background: 'var(--forest)', margin: '0 auto 3rem' }} />
+        <div style={{ marginBottom: '2rem' }} />
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1.5rem' }}>
           {creators.map(c => (
             <div key={c._id} className="card" style={{ textAlign: 'center' }}>
@@ -125,6 +123,7 @@ function Home({ user }) {
           </div>
         </section>
 
+        <CreatorsSection apiBase={API_BASE_URL} />
       </div>
     );
   }
@@ -178,6 +177,9 @@ function Home({ user }) {
           </div>
         </div>
       </section>
+
+      {/* Creators */}
+      <CreatorsSection apiBase={API_BASE_URL} />
 
       {/* CTA */}
       <section style={{ background: 'var(--forest)', color: 'white', padding: '4rem 1.5rem', textAlign: 'center' }}>
