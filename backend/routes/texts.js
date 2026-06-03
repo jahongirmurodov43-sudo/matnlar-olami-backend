@@ -16,7 +16,8 @@ router.get('/', async (req, res) => {
       { content: { $regex: search, $options: 'i' } },
     ];
 
-    const texts = await Text.find(filter).sort({ createdAt: -1 });
+    // Exclude audioUrl from list — it can be large (base64) and slows down page loads
+    const texts = await Text.find(filter).select('-audioUrl').sort({ createdAt: -1 });
     res.json(texts);
   } catch (err) {
     res.status(500).json({ message: err.message });
