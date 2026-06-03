@@ -106,7 +106,7 @@ function Home({ user }) {
               Sinfni tanlang
             </h2>
             <p style={{ textAlign: 'center', fontFamily: 'var(--font-body)', color: 'var(--ink-muted)', marginBottom: '2rem', fontSize: '0.9rem' }}>
-              Choraklar va matnlar ichkariga keltiradi
+              Quyidagi sinflardan birini bosing — matnlar ichkarida keltirilgan.
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1.25rem' }}>
               {[1, 2, 3, 4].map(grade => (
