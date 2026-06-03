@@ -16,7 +16,7 @@ function Settings() {
             Haqida
           </h2>
           <p style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-soft)', fontSize: '0.95rem', lineHeight: 1.8 }}>
-            <strong>Matnlar Olami</strong> — boshlang'ich sinflar o'qish darsligi bo'yicha matnlar va namunaviy savollar to'plami. O'qituvchilar uchun qulay, 1–4 sinf uchun choraklar bo'yicha tartiblangan kutubxona.
+            <strong>Matnlar Olami</strong> — boshlang'ich sinf o'qish savodxonligi darslarida matn ustida ishlash va tanqidiy fikrlashga yo'naltiruvchi savollar to'plami. O'qituvchilar uchun qulay, sinflar va choraklar bo'yicha tartiblangan kutubxona.
           </p>
           <p style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-muted)', fontSize: '0.82rem', marginTop: '1rem' }}>
             © 2026 Matnlar Olami
