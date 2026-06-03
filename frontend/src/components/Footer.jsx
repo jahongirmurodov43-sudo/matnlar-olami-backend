@@ -10,7 +10,7 @@ function Footer() {
         "Kitob — bu eng yaxshi do'st, eng zo'r ustoz."
       </p>
       <p style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-muted)', fontSize: '0.8rem' }}>
-        © {new Date().getFullYear()} Matnlar Olami — boshlang'ich sinf o'qituvchilari uchun
+        © {new Date().getFullYear()} O'qish savodxonligi darslarida matn ustida ishlash — boshlang'ich sinf o'qituvchilari uchun
       </p>
     </footer>
   );
