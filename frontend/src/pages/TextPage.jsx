@@ -26,6 +26,36 @@ function TextPage({ user }) {
   const [fontSize, setFontSize] = useState(1.08);
   const [noteText, setNoteText] = useState('');
   const [noteSaved, setNoteSaved] = useState(false);
+  const [readingMode, setReadingMode] = useState(false);
+  const [readingTheme, setReadingTheme] = useState('light'); // light | sepia | dark
+  const [readingFontSize, setReadingFontSize] = useState(1.15);
+  const [scrollPct, setScrollPct] = useState(0);
+
+  // Scroll progress for reading mode
+  useEffect(() => {
+    if (!readingMode) return;
+    const el = document.getElementById('reading-scroll');
+    if (!el) return;
+    const onScroll = () => {
+      const { scrollTop, scrollHeight, clientHeight } = el;
+      setScrollPct(scrollHeight <= clientHeight ? 100 : Math.round((scrollTop / (scrollHeight - clientHeight)) * 100));
+    };
+    el.addEventListener('scroll', onScroll);
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [readingMode]);
+
+  // Close reading mode on Escape
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') setReadingMode(false); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  const themes = {
+    light: { bg: '#fafaf7', text: '#2a2620', toolbar: '#fff', border: '#e8e0d0' },
+    sepia: { bg: '#f4ede0', text: '#3d2b1f', toolbar: '#ede4d4', border: '#d5c4a8' },
+    dark:  { bg: '#1a1a1a', text: '#e0d9cc', toolbar: '#242424', border: '#333' },
+  };
   const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
   useEffect(() => {
@@ -254,6 +284,120 @@ function TextPage({ user }) {
   // Split paragraphs
   const paragraphs = text.content.split(/\n\s*\n/).map(p => p.trim()).filter(Boolean);
 
+  // ── Reading Mode ─────────────────────────────────────────────
+  if (readingMode) {
+    const t = themes[readingTheme];
+    const mins = Math.ceil(text.content.split(/\s+/).length / 120);
+    return (
+      <div
+        id="reading-scroll"
+        style={{ position: 'fixed', inset: 0, zIndex: 1000, background: t.bg, overflowY: 'auto', transition: 'background 0.3s' }}
+      >
+        {/* Progress bar */}
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, height: '3px', background: t.border, zIndex: 1001 }}>
+          <div style={{ height: '100%', width: `${scrollPct}%`, background: '#2d5a27', transition: 'width 0.1s' }} />
+        </div>
+
+        {/* Toolbar */}
+        <div style={{
+          position: 'sticky', top: 0, zIndex: 1000,
+          background: t.toolbar, borderBottom: `1px solid ${t.border}`,
+          padding: '10px 20px', display: 'flex', alignItems: 'center',
+          gap: '0.75rem', flexWrap: 'wrap', backdropFilter: 'blur(6px)',
+        }}>
+          {/* Exit */}
+          <button onClick={() => setReadingMode(false)} style={{ fontFamily: 'var(--font-body)', background: 'none', border: `1px solid ${t.border}`, color: t.text, padding: '6px 14px', borderRadius: '7px', cursor: 'pointer', fontSize: '0.82rem', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            ← Chiqish
+          </button>
+
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.9rem', fontWeight: 600, color: t.text, flex: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            {text.title}
+          </span>
+
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: '0.75rem', color: t.text, opacity: 0.55 }}>
+            ~{mins} daqiqa · {scrollPct}%
+          </span>
+
+          {/* Font size */}
+          <div style={{ display: 'flex', border: `1px solid ${t.border}`, borderRadius: '7px', overflow: 'hidden' }}>
+            {[['A−', -0.1], ['↺', null], ['A+', 0.1]].map(([label, delta]) => (
+              <button key={label} onClick={() => setReadingFontSize(s => delta === null ? 1.15 : Math.min(2, Math.max(0.9, s + delta)))}
+                style={{ fontFamily: 'var(--font-body)', background: 'none', border: 'none', borderRight: label !== 'A+' ? `1px solid ${t.border}` : 'none', padding: '6px 10px', cursor: 'pointer', fontSize: '0.82rem', color: t.text }}>
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Theme switcher */}
+          <div style={{ display: 'flex', gap: '5px' }}>
+            {[
+              { key: 'light', bg: '#fafaf7', label: '☀' },
+              { key: 'sepia', bg: '#f4ede0', label: '📜' },
+              { key: 'dark',  bg: '#1a1a1a', label: '🌙' },
+            ].map(th => (
+              <button key={th.key} onClick={() => setReadingTheme(th.key)}
+                title={th.key}
+                style={{ width: '26px', height: '26px', borderRadius: '50%', border: readingTheme === th.key ? '2px solid #2d5a27' : `1px solid ${t.border}`, background: th.bg, cursor: 'pointer', fontSize: '0.7rem' }}>
+                {readingTheme === th.key ? '' : ''}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Content */}
+        <div style={{ maxWidth: '660px', margin: '0 auto', padding: '3rem 2rem 6rem' }}>
+          {/* Meta */}
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.78rem', color: t.text, opacity: 0.45, textAlign: 'center', marginBottom: '0.5rem', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+            {grade}-sinf · {quarter}-chorak
+          </p>
+
+          {/* Title */}
+          <h1 style={{ fontFamily: 'Georgia, serif', fontSize: 'clamp(1.8rem, 4vw, 2.4rem)', textAlign: 'center', color: t.text, marginBottom: '1rem', lineHeight: 1.2, fontWeight: 700 }}>
+            {text.title}
+          </h1>
+
+          {/* Divider */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', margin: '0 auto 2rem' }}>
+            <span style={{ fontSize: '0.4rem', color: '#2d5a27' }}>●</span>
+            <div style={{ width: '50px', height: '1px', background: '#2d5a27', opacity: 0.5 }} />
+            <span style={{ fontSize: '0.4rem', color: '#2d5a27' }}>●</span>
+          </div>
+
+          {/* Audio (if any) */}
+          {text.audioUrl && (
+            <div style={{ marginBottom: '2rem' }}>
+              <audio controls src={text.audioUrl} style={{ width: '100%', borderRadius: '8px' }} />
+            </div>
+          )}
+
+          {/* Paragraphs */}
+          <div style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: `${readingFontSize}rem`, lineHeight: 2, color: t.text, transition: 'font-size 0.2s, color 0.3s' }}>
+            {paragraphs.map((para, i) => (
+              <p key={i} style={{ marginBottom: '1.4rem', textIndent: i === 0 ? 0 : '2em', textAlign: 'justify' }}>
+                {i === 0 ? (
+                  <>
+                    <span style={{ float: 'left', fontFamily: 'Georgia, serif', fontSize: `${readingFontSize * 3.2}rem`, lineHeight: '0.8', marginRight: '0.1em', marginTop: '0.08em', color: '#2d5a27', fontWeight: 700 }}>
+                      {para[0]}
+                    </span>
+                    {para.slice(1)}
+                  </>
+                ) : para}
+              </p>
+            ))}
+          </div>
+
+          {/* Done button */}
+          <div style={{ textAlign: 'center', marginTop: '3rem', paddingTop: '2rem', borderTop: `1px solid ${t.border}` }}>
+            <button onClick={() => setReadingMode(false)}
+              style={{ fontFamily: 'var(--font-body)', background: '#2d5a27', color: 'white', border: 'none', padding: '12px 36px', borderRadius: '8px', cursor: 'pointer', fontSize: '1rem', fontWeight: 500 }}>
+              ✓ O'qib bo'ldim
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{ minHeight: '100vh', padding: '2rem 1.5rem' }}>
       <div className="container" style={{ maxWidth: '720px' }}>
@@ -284,6 +428,13 @@ function TextPage({ user }) {
             style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-body)', background: 'none', border: `1px solid ${isFavorite(id) ? '#e8b4b4' : 'var(--border)'}`, padding: '8px 16px', borderRadius: '7px', cursor: 'pointer', fontSize: '0.85rem', color: isFavorite(id) ? '#c0392b' : 'var(--ink-soft)' }}
           >
             {isFavorite(id) ? '♥' : '♡'} {isFavorite(id) ? 'Sevimli' : 'Sevimliga qo\'shish'}
+          </button>
+          <button
+            onClick={() => { setScrollPct(0); setReadingMode(true); }}
+            style={{ display: 'flex', alignItems: 'center', gap: '6px', fontFamily: 'var(--font-body)', background: 'var(--forest)', color: 'white', border: 'none', padding: '8px 16px', borderRadius: '7px', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 500 }}
+            title="O'qish rejimi"
+          >
+            📖 O'qish rejimi
           </button>
           {user?.role === 'admin' && (
             <>
