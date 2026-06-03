@@ -56,9 +56,22 @@ function TextPage({ user }) {
       content: text.content,
       grade: text.grade,
       quarter: text.quarter,
+      audioUrl: text.audioUrl || '',
       questions: text.questions?.length > 0 ? text.questions : [{ question: '', answer: '' }],
     });
     setEditing(true);
+  };
+
+  const handleAudioFile = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (file.size > 8 * 1024 * 1024) {
+      alert('Fayl hajmi 8 MB dan oshmasligi kerak. Kattaroq faylni Google Drive yoki boshqa xostingga yuklang va URL ni joylashtiring.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (ev) => setEditForm(f => ({ ...f, audioUrl: ev.target.result }));
+    reader.readAsDataURL(file);
   };
 
   const handleEditSave = async (e) => {
@@ -147,6 +160,56 @@ function TextPage({ user }) {
             rows={10}
             style={{ fontFamily: 'var(--font-body)', padding: '12px 16px', border: '1px solid var(--border)', borderRadius: '8px', fontSize: '1rem', lineHeight: 1.7, background: 'var(--paper-light)', resize: 'vertical' }}
           />
+
+          {/* Audio section */}
+          <div style={{ border: '1px solid var(--border)', borderRadius: '10px', padding: '1.25rem', background: 'var(--paper-light)' }}>
+            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.05rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              🔊 Audio fayl
+            </h3>
+
+            {/* Current audio preview */}
+            {editForm.audioUrl && (
+              <div style={{ marginBottom: '1rem' }}>
+                <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.8rem', color: 'var(--ink-muted)', marginBottom: '0.5rem' }}>Hozirgi audio:</p>
+                <audio controls src={editForm.audioUrl} style={{ width: '100%', borderRadius: '6px' }} />
+                <button
+                  type="button"
+                  onClick={() => setEditForm(f => ({ ...f, audioUrl: '' }))}
+                  style={{ marginTop: '0.5rem', fontFamily: 'var(--font-body)', background: 'none', border: '1px solid #e8b4b4', color: '#c0392b', padding: '5px 14px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.8rem' }}
+                >✕ Audioni o'chirish</button>
+              </div>
+            )}
+
+            {/* Upload file */}
+            <div style={{ marginBottom: '0.75rem' }}>
+              <label style={{ fontFamily: 'var(--font-body)', fontSize: '0.82rem', color: 'var(--ink-soft)', display: 'block', marginBottom: '0.4rem', fontWeight: 500 }}>
+                📁 Fayl yuklash (MP3, WAV — max 8 MB)
+              </label>
+              <input
+                type="file"
+                accept="audio/*"
+                onChange={handleAudioFile}
+                style={{ fontFamily: 'var(--font-body)', fontSize: '0.88rem', width: '100%', padding: '8px', border: '1px solid var(--border)', borderRadius: '7px', background: 'white', cursor: 'pointer', boxSizing: 'border-box' }}
+              />
+            </div>
+
+            {/* Or paste URL */}
+            <div>
+              <label style={{ fontFamily: 'var(--font-body)', fontSize: '0.82rem', color: 'var(--ink-soft)', display: 'block', marginBottom: '0.4rem', fontWeight: 500 }}>
+                🔗 Yoki URL joylashtiring (Google Drive, Dropbox…)
+              </label>
+              <input
+                type="url"
+                placeholder="https://..."
+                value={editForm.audioUrl?.startsWith('data:') ? '' : (editForm.audioUrl || '')}
+                onChange={e => setEditForm(f => ({ ...f, audioUrl: e.target.value }))}
+                style={{ fontFamily: 'var(--font-body)', padding: '10px 14px', border: '1px solid var(--border)', borderRadius: '7px', fontSize: '0.9rem', background: 'white', width: '100%', boxSizing: 'border-box', outline: 'none' }}
+              />
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: '0.75rem', color: 'var(--ink-muted)', marginTop: '0.4rem' }}>
+                Google Drive: faylni "Hammaga ochiq" qiling → "Ulashish" → to'g'ridan-to'g'ri link oling
+              </p>
+            </div>
+          </div>
 
           <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '1.1rem', marginBottom: '0.25rem' }}>Savollar</h3>
           {editForm.questions.map((q, i) => (
@@ -248,15 +311,25 @@ function TextPage({ user }) {
           {text.title}
         </h1>
 
-        {/* Audio button */}
+        {/* Audio section */}
         <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-          <button
-            onClick={speak}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: isPlaying ? 'var(--forest-deep)' : 'var(--forest)', color: 'white', border: 'none', padding: '10px 24px', borderRadius: '50px', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '0.9rem', fontWeight: 500 }}
-          >
-            {isPlaying ? <Pause size={16} /> : <Play size={16} />}
-            {isPlaying ? 'To\'xtatish' : 'Tinglash'}
-          </button>
+          {text.audioUrl ? (
+            <div style={{ maxWidth: '480px', margin: '0 auto' }}>
+              <audio
+                controls
+                src={text.audioUrl}
+                style={{ width: '100%', borderRadius: '8px' }}
+              />
+            </div>
+          ) : (
+            <button
+              onClick={speak}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: isPlaying ? 'var(--forest-deep)' : 'var(--forest)', color: 'white', border: 'none', padding: '10px 24px', borderRadius: '50px', cursor: 'pointer', fontFamily: 'var(--font-body)', fontSize: '0.9rem', fontWeight: 500 }}
+            >
+              {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+              {isPlaying ? 'To\'xtatish' : 'Tinglash'}
+            </button>
+          )}
         </div>
 
         {/* Divider */}

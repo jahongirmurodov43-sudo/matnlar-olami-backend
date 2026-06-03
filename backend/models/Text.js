@@ -12,6 +12,7 @@ const textSchema = new mongoose.Schema({
   }],
   language: { type: String, enum: ['uz', 'ru'], default: 'uz' },
   difficulty: { type: String, enum: ['easy', 'medium', 'hard'], default: 'medium' },
+  audioUrl: { type: String, default: '' },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   createdAt: { type: Date, default: Date.now }
 });
