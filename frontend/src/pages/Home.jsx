@@ -125,7 +125,6 @@ function Home({ user }) {
           </div>
         </section>
 
-        <CreatorsSection apiBase={API_BASE_URL} />
       </div>
     );
   }
@@ -179,9 +178,6 @@ function Home({ user }) {
           </div>
         </div>
       </section>
-
-      {/* Creators */}
-      <CreatorsSection apiBase={API_BASE_URL} />
 
       {/* CTA */}
       <section style={{ background: 'var(--forest)', color: 'white', padding: '4rem 1.5rem', textAlign: 'center' }}>
