@@ -18,6 +18,7 @@ import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
 import Classes from './pages/Classes';
 import Assignments from './pages/Assignments';
+import NotFound from './pages/NotFound';
 
 function PrivateRoute({ user, children }) {
   if (!user) return <Navigate to="/login" replace />;
@@ -87,6 +88,7 @@ function App() {
             <Route path="/parolni-tiklash" element={<ResetPassword />} />
             <Route path="/sinflar" element={<PrivateRoute user={user}><Classes user={user} /></PrivateRoute>} />
             <Route path="/topshiriqlar" element={<PrivateRoute user={user}><Assignments user={user} /></PrivateRoute>} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
 

@@ -39,7 +39,7 @@ function Login({ setUser }) {
           <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>📖</div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', marginBottom: '0.4rem' }}>Kirish</h1>
           <p style={{ fontFamily: 'var(--font-body)', color: 'var(--ink-muted)', fontSize: '0.95rem' }}>
-            Matnlar Olamiga xush kelibsiz
+            Boshlang'ich sinflar uchun
           </p>
         </div>
 

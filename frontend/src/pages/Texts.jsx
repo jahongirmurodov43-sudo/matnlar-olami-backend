@@ -43,7 +43,7 @@ function Texts({ user, lang }) {
     <div style={{ minHeight: '100vh', padding: '3rem 1.5rem' }}>
       <div className="container">
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 5vw, 3rem)', textAlign: 'center', marginBottom: '0.5rem' }}>
-          {lang === 'uz' ? 'Matnlar Olami' : 'Мир Текстов'}
+          {lang === 'uz' ? 'Matnlar' : 'Тексты'}
         </h1>
         {gradeFilter && (
           <p style={{ textAlign: 'center', fontFamily: 'var(--font-body)', color: 'var(--ink-muted)', marginBottom: '2.5rem' }}>
