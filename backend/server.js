@@ -1,9 +1,14 @@
+import dns from 'dns';
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
 dotenv.config();
+
+// Ba'zi lokal DNS'lar SRV so'rovini rad etadi (mongodb+srv shuni talab qiladi) —
+// tizim serveridan keyin ommaviy DNS'ni zaxira sifatida qo'shamiz
+dns.setServers([...new Set([...dns.getServers(), '8.8.8.8', '1.1.1.1'])]);
 
 const app = express();
 
